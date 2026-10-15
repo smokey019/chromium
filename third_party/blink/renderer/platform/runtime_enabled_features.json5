@@ -458,13 +458,6 @@
     {
       name: "AIPromptAPI",
       public: true,
-      status: {
-        "Win": "stable",
-        "Mac": "stable",
-        "Linux": "stable",
-        "ChromeOS": "stable",
-        "default": "",
-      },
     },
     {
       name: "AIPromptAPIForWorkers",
@@ -484,13 +477,6 @@
     },
     {
       name: "AIPromptAPIMultimodalInput",
-      status: {
-        "Win": "stable",
-        "Mac": "stable",
-        "Linux": "stable",
-        "ChromeOS": "stable",
-        "default": "",
-      },
     },
     {
       // Gates access to inference parameter enhancements for "AIPromptAPI".
@@ -511,7 +497,6 @@
       // Gates access to the responseConstraint enhancement for "AIPromptAPI".
       // This feature alone does not expose any "AIPromptAPI" feature access.
       name: "AIPromptAPIStructuredOutput",
-      status: "stable",
     },
     {
       // Gates access to the tool use (function calling) enhancement for
@@ -562,13 +547,6 @@
     },
     {
       name: "AISummarizationAPI",
-      status: {
-        "Win": "stable",
-        "Mac": "stable",
-        "Linux": "stable",
-        "ChromeOS": "stable",
-        "default": "",
-      },
     },
     {
       name: "AISummarizationAPIForWorkers",

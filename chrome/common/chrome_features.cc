@@ -267,7 +267,7 @@ BASE_FEATURE(kForcedAppRelaunchOnPlaceholderUpdate,
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
 // Controls whether the actor component of Glic is enabled.
-BASE_FEATURE(kGlicActor, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kGlicActor, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kGlicActorApcComparison, base::FEATURE_ENABLED_BY_DEFAULT);
 
@@ -317,7 +317,7 @@ const base::FeatureParam<std::string>
         "https://gemini.google.com/app"};
 
 // Controls whether the Actor UI components are enabled.
-BASE_FEATURE(kGlicActorUi, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kGlicActorUi, base::FEATURE_DISABLED_BY_DEFAULT);
 BASE_FEATURE(kGlicConfirmTabClose, base::FEATURE_ENABLED_BY_DEFAULT);
 // Controls whether we ignore users preference of reduced motion enabled and
 // still show the tab indicator spinner. No-op if kGlicActorUiTabIndicator is
@@ -551,14 +551,7 @@ BASE_FEATURE(kGlicMessageFirstFre, base::FEATURE_DISABLED_BY_DEFAULT);
 // IMPORTANT: this feature should never be expired! It is used as the main
 // kill-switch for Glic and can be used in the future to handle unsupported
 // Chrome versions.
-BASE_FEATURE(kGlic,
-#if BUILDFLAG(IS_MAC) || BUILDFLAG(IS_WIN) || BUILDFLAG(IS_CHROMEOS) || \
-    BUILDFLAG(IS_ANDROID)
-             base::FEATURE_ENABLED_BY_DEFAULT
-#else
-             base::FEATURE_DISABLED_BY_DEFAULT
-#endif
-);
+BASE_FEATURE(kGlic, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kGlicBackgroundActuation, base::FEATURE_DISABLED_BY_DEFAULT);
 
@@ -1076,7 +1069,7 @@ BASE_FEATURE(kGoogleChromeScheme, base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Controls whether the Google Search AI Mode Workspace link (Connected Apps) is
 // shown in AI Settings. Acts as a killswitch.
-BASE_FEATURE(kGoogleSearchAiModeWorkspace, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kGoogleSearchAiModeWorkspace, base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Force Privacy Guide to be available even if it would be unavailable
 // otherwise. This is meant for development and test purposes only.

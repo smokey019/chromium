@@ -98,7 +98,7 @@ BASE_FEATURE(kOptimizationGuidePredictionModelKillswitch,
 
 // Whether to enable model execution.
 BASE_FEATURE(kOptimizationGuideModelExecution,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether the on device service is launched after a delay on startup to log
 // metrics.

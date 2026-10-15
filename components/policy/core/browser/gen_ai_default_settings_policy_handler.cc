@@ -183,13 +183,12 @@ void GenAiDefaultSettingsPolicyHandler::ApplyPolicySettings(
     return;
   }
 
+  // This browser ships with generative AI features off: an unset policy
+  // behaves as 2 (do not allow). Per-feature policies still take
+  // precedence.
   const base::Value* default_value =
       policies.GetValue(policy_name(), base::Value::Type::INTEGER);
-  if (!default_value) {
-    return;
-  }
-
-  int default_int_value = default_value->GetInt();
+  int default_int_value = default_value ? default_value->GetInt() : 2;
   for (const auto& policy : gen_ai_policies_) {
     // Get the value to apply from the policy and its overriding policy.
     std::optional<int> value_to_apply =

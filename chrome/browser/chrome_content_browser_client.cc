@@ -1739,7 +1739,7 @@ void ChromeContentBrowserClient::RegisterProfilePrefs(
   registry->RegisterBooleanPref(
       prefs::kServiceWorkerToControlSrcdocIframeEnabled, true);
   registry->RegisterBooleanPref(policy::policy_prefs::kBuiltInAIAPIsEnabled,
-                                true);
+                                false);
   registry->RegisterBooleanPref(
       prefs::kClearWindowNameForNewBrowsingContextGroup, true);
   registry->RegisterBooleanPref(prefs::kPrefetchWithServiceWorkerEnabled, true);

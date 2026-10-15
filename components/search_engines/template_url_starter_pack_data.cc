@@ -17,7 +17,7 @@
 namespace template_url_starter_pack_data {
 
 // Update this whenever a change is made to any starter pack data.
-const int kCurrentDataVersion = 13;
+const int kCurrentDataVersion = 14;
 
 // Only update this if there's an incompatible change that requires force
 // updating the user's starter pack data. This will overwrite any of the
@@ -57,16 +57,6 @@ const StarterPackEngine tabs = {
     .type = SEARCH_ENGINE_STARTER_PACK_TABS,
 };
 
-const StarterPackEngine gemini = {
-    .name_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_GEMINI_NAME,
-    .keyword_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_GEMINI_KEYWORD,
-    .favicon_url = nullptr,
-    .search_url = "https://gemini.google.com/app?q={searchTerms}",
-    .destination_url = "https://gemini.google.com",
-    .id = StarterPackId::kGemini,
-    .type = SEARCH_ENGINE_STARTER_PACK_GEMINI,
-};
-
 const StarterPackEngine page = {
     .name_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_PAGE_NAME,
     .keyword_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_PAGE_KEYWORD,
@@ -77,23 +67,11 @@ const StarterPackEngine page = {
     .type = SEARCH_ENGINE_STARTER_PACK_PAGE,
 };
 
-const StarterPackEngine ai_mode = {
-    .name_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_AI_MODE_NAME,
-    .keyword_message_id = IDS_SEARCH_ENGINES_STARTER_PACK_AI_MODE_KEYWORD,
-    .favicon_url = nullptr,
-    // - `udm=50` triggers AI mode as opposed to traditional search.
-    // - `aep=48` identifies source of the request as the omnibox as opposed to
-    //    e.g. the NTP realbox.
-    .search_url =
-        "https://www.google.com/"
-        "search?sourceid=chrome&udm=50&aep=48&q={searchTerms}",
-    .destination_url = "https://www.google.com",
-    .id = StarterPackId::kAiMode,
-    .type = SEARCH_ENGINE_STARTER_PACK_AI_MODE,
-};
-
 const StarterPackEngine* engines[] = {
-    &bookmarks, &history, &tabs, &gemini, &page, &ai_mode,
+    &bookmarks,
+    &history,
+    &tabs,
+    &page,
 };
 
 int GetDataVersion() {

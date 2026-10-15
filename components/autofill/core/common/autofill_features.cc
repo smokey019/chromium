@@ -428,7 +428,11 @@ DEFINE_FEATURE_WITH_MOBILE_COUNTRY_RESTRICTION(
     kAutofillAiWalletVehicleRegistration);
 
 // Enables the second iteration AutofillAI.
+#if BUILDFLAG(IS_ANDROID) || BUILDFLAG(IS_IOS)
 DEFINE_FEATURE_WITH_MOBILE_COUNTRY_RESTRICTION(kAutofillAiWithDataSchema);
+#else
+BASE_FEATURE(kAutofillAiWithDataSchema, base::FEATURE_DISABLED_BY_DEFAULT);
+#endif
 
 // When enabled, autofill will fill not skip filling fields that had an initial
 // value which was modified.

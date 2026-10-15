@@ -2457,11 +2457,11 @@ void RegisterProfilePrefs(user_prefs::PrefRegistrySyncable* registry,
 
 #if BUILDFLAG(ENABLE_LENS_DESKTOP)
   registry->RegisterBooleanPref(
-      prefs::kLensRegionSearchEnabled, true,
+      prefs::kLensRegionSearchEnabled, false,
       user_prefs::PrefRegistrySyncable::SYNCABLE_PREF);
 #endif
 #if BUILDFLAG(ENABLE_LENS_DESKTOP) || BUILDFLAG(ENABLE_WEBUI_NTP)
-  registry->RegisterBooleanPref(prefs::kLensDesktopNTPSearchEnabled, true);
+  registry->RegisterBooleanPref(prefs::kLensDesktopNTPSearchEnabled, false);
 #endif
 
   registry->RegisterBooleanPref(prefs::kDisableScreenshots, false);

@@ -94,7 +94,7 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   registry->RegisterDictionaryPref(localstate::kOnDeviceModelValidationResult);
   registry->RegisterDictionaryPref(localstate::kLastUsageByFeature);
   registry->RegisterIntegerPref(
-      localstate::kGenAILocalFoundationalModelEnterprisePolicySettings, 0);
+      localstate::kGenAILocalFoundationalModelEnterprisePolicySettings, 1);
   registry->RegisterBooleanPref(localstate::kOnDeviceAiUserSettingsEnabled,
                                 true);
   registry->RegisterBooleanPref(

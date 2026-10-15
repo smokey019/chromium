@@ -162,7 +162,9 @@ void RegisterComponentsForUpdate() {
   RegisterTrustTokenKeyCommitmentsComponentIfTrustTokensEnabled(cus);
   RegisterPrivateVerificationTokensComponentIfEnabled(cus);
   RegisterPrivacySandboxAttestationsComponent(cus);
-  RegisterActorSafetyListsComponent(cus, base::OnceClosure());
+  if (base::FeatureList::IsEnabled(features::kGlicActor)) {
+    RegisterActorSafetyListsComponent(cus, base::OnceClosure());
+  }
   if (history_embeddings::IsHistoryEmbeddingsFeatureEnabled()) {
     RegisterHistorySearchStringsComponent(cus);
   }
