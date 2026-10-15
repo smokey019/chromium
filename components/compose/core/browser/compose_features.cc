@@ -10,7 +10,7 @@ namespace compose::features {
 
 // Note: Compose is enabled by default because it is country--restricted at
 // runtime.
-BASE_FEATURE(kEnableCompose, "Compose", base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kEnableCompose, "Compose", base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kComposeInputParams, base::FEATURE_DISABLED_BY_DEFAULT);
 
@@ -20,7 +20,7 @@ BASE_FEATURE(kComposeAXSnapshot, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kComposeAutoSubmit, base::FEATURE_DISABLED_BY_DEFAULT);
 
-BASE_FEATURE(kComposeEligible, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kComposeEligible, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kEnableComposeSavedStateNudge,
              "ComposeNudge",

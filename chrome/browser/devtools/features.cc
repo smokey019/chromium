@@ -12,7 +12,7 @@ namespace features {
 
 // Let the DevTools front-end query an AIDA endpoint for explanations and
 // insights regarding console (error) messages.
-BASE_FEATURE(kDevToolsConsoleInsights, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsConsoleInsights, base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsConsoleInsightsModelId{
     &kDevToolsConsoleInsights, "aida_model_id", /*default_value=*/""};
 const base::FeatureParam<double> kDevToolsConsoleInsightsTemperature{
@@ -34,7 +34,7 @@ const base::FeatureParam<DevToolsFreestylerExecutionMode>::Option
         {DevToolsFreestylerExecutionMode::kNoScripts, "NO_SCRIPTS"}};
 
 // Whether the DevTools styling assistant is enabled.
-BASE_FEATURE(kDevToolsFreestyler, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsFreestyler, base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsFreestylerModelId{
     &kDevToolsFreestyler, "aida_model_id", /*default_value=*/""};
 const base::FeatureParam<double> kDevToolsFreestylerTemperature{
@@ -60,7 +60,7 @@ const base::FeatureParam<bool> kDevToolsFreestylerFunctionCalling{
 
 // Whether the DevTools AI Assistance Network Agent is enabled.
 BASE_FEATURE(kDevToolsAiAssistanceNetworkAgent,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsAiAssistanceNetworkAgentModelId{
     &kDevToolsAiAssistanceNetworkAgent, "aida_model_id",
     /*default_value=*/""};
@@ -75,7 +75,7 @@ const base::FeatureParam<DevToolsFreestylerUserTier>
 
 // Whether the DevTools AI Assistance Performance Agent is enabled.
 BASE_FEATURE(kDevToolsAiAssistancePerformanceAgent,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string>
     kDevToolsAiAssistancePerformanceAgentModelId{
         &kDevToolsAiAssistancePerformanceAgent, "aida_model_id",
@@ -95,7 +95,7 @@ const base::FeatureParam<bool>
         /*default_value=*/true};
 
 // Whether the DevTools AI Assistance File Agent is enabled.
-BASE_FEATURE(kDevToolsAiAssistanceFileAgent, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsAiAssistanceFileAgent, base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsAiAssistanceFileAgentModelId{
     &kDevToolsAiAssistanceFileAgent, "aida_model_id",
     /*default_value=*/""};
@@ -110,14 +110,14 @@ const base::FeatureParam<DevToolsFreestylerUserTier>
 
 // Whether the DevTools AI Assistance Accessibility Agent is enabled.
 BASE_FEATURE(kDevToolsAiAssistanceAccessibilityAgent,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether the DevTools AI Assistance Storage Agent is enabled.
 BASE_FEATURE(kDevToolsAiAssistanceStorageAgent,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether the DevTools AI Code Completion is enabled.
-BASE_FEATURE(kDevToolsAiCodeCompletion, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsAiCodeCompletion, base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsAiCodeCompletionModelId{
     &kDevToolsAiCodeCompletion, "aida_model_id",
     /*default_value=*/""};
@@ -131,7 +131,7 @@ const base::FeatureParam<DevToolsFreestylerUserTier>
         &devtools_freestyler_user_tier_options};
 
 // Whether the DevTools AI Code Generation is enabled.
-BASE_FEATURE(kDevToolsAiCodeGeneration, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsAiCodeGeneration, base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsAiCodeGenerationModelId{
     &kDevToolsAiCodeGeneration, "aida_model_id",
     /*default_value=*/""};
@@ -145,7 +145,8 @@ const base::FeatureParam<DevToolsFreestylerUserTier>
         &devtools_freestyler_user_tier_options};
 
 // Whether the DevTools AI Code Completion for Styles pane is enabled.
-BASE_FEATURE(kDevToolsAiCodeCompletionStyles, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsAiCodeCompletionStyles,
+             base::FEATURE_DISABLED_BY_DEFAULT);
 const base::FeatureParam<std::string> kDevToolsAiCodeCompletionStylesModelId{
     &kDevToolsAiCodeCompletionStyles, "aida_model_id",
     /*default_value=*/""};
@@ -167,7 +168,7 @@ BASE_FEATURE(kDevToolsAnimationStylesInStylesTab,
 
 // Whether the DevTools AI generated annotation labels in timeline are enabled.
 BASE_FEATURE(kDevToolsAiGeneratedTimelineLabels,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether the DevTools AI generated annotation labels in timeline are enabled.
 BASE_FEATURE(kDevToolsNewPermissionDialog, base::FEATURE_ENABLED_BY_DEFAULT);
@@ -176,7 +177,7 @@ BASE_FEATURE(kDevToolsNewPermissionDialog, base::FEATURE_ENABLED_BY_DEFAULT);
 BASE_FEATURE(kDevToolsVerticalDrawer, base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Whether the global AI entrypoint is enabled.
-BASE_FEATURE(kDevToolsGlobalAiButton, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsGlobalAiButton, base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether the promotion animation is enabled.
 const base::FeatureParam<bool> kDevToolsGlobalAiButtonPromotionEnabled{
@@ -210,7 +211,7 @@ BASE_FEATURE(kDevToolsAcceptDebuggingConnections,
 #endif  // BUILDFLAG(IS_CHROMEOS)
 
 BASE_FEATURE(kDevToolsAiAssistanceContextSelectionAgent,
-             base::FEATURE_ENABLED_BY_DEFAULT);
+             base::FEATURE_DISABLED_BY_DEFAULT);
 
 // Whether Console Insights Teasers are enabled.
 BASE_FEATURE(kDevToolsConsoleInsightsTeasers,
@@ -236,7 +237,7 @@ BASE_FEATURE(kDevToolsProtocolMonitor, base::FEATURE_DISABLED_BY_DEFAULT);
 // Whether to display the Gemini rebranding for AI Assistance.
 BASE_FEATURE(kDevToolsGeminiRebranding, base::FEATURE_DISABLED_BY_DEFAULT);
 
-BASE_FEATURE(kDevToolsAiOriginTrialsApis, base::FEATURE_ENABLED_BY_DEFAULT);
+BASE_FEATURE(kDevToolsAiOriginTrialsApis, base::FEATURE_DISABLED_BY_DEFAULT);
 
 BASE_FEATURE(kDevToolsUseGcaApi, base::FEATURE_DISABLED_BY_DEFAULT);
 
