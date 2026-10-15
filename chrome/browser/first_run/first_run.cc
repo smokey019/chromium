@@ -353,10 +353,13 @@ bool IsChromeFirstRun() {
   if (g_first_run == internal::FIRST_RUN_UNKNOWN) {
     const base::CommandLine* command_line =
         base::CommandLine::ForCurrentProcess();
+    // Skip the first-run experience (chrome://intro, imports, welcome tabs)
+    // and open straight to the browser, as if --no-first-run were always
+    // passed. --force-first-run still opts back in.
     g_first_run = internal::DetermineFirstRunState(
         IsFirstRunSentinelPresent(),
         command_line->HasSwitch(switches::kForceFirstRun),
-        command_line->HasSwitch(switches::kNoFirstRun));
+        /*no_first_run=*/true);
   }
   return g_first_run == internal::FIRST_RUN_TRUE;
 }
