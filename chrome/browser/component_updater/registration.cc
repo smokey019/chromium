@@ -158,7 +158,9 @@ void RegisterComponentsForUpdate() {
   RegisterOptimizationHintsComponent(cus);
   RegisterTrustTokenKeyCommitmentsComponentIfTrustTokensEnabled(cus);
   RegisterPrivateVerificationTokensComponentIfEnabled(cus);
-  RegisterActorSafetyListsComponent(cus, base::OnceClosure());
+  if (base::FeatureList::IsEnabled(features::kGlicActor)) {
+    RegisterActorSafetyListsComponent(cus, base::OnceClosure());
+  }
   RegisterSSLErrorAssistantComponent(cus);
 
   RegisterIndigoComponent(cus);
