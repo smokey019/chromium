@@ -18,6 +18,9 @@ class Profile;
 // OmniboxEverywhereUI) so 3P surfaces (NewTabPageThirdPartyUI) remain isolated.
 class MostVisitedPrefObserver {
  public:
+  // Default for `ntp_prefs::kNtpShortcutsMaxCount`.
+  static constexpr int kDefaultShortcutsMaxCount = 10;
+
   MostVisitedPrefObserver(Profile* profile, MostVisitedHandler* handler);
   MostVisitedPrefObserver(const MostVisitedPrefObserver&) = delete;
   MostVisitedPrefObserver& operator=(const MostVisitedPrefObserver&) = delete;
@@ -32,6 +35,7 @@ class MostVisitedPrefObserver {
   virtual bool IsShortcutsVisible() const;
   virtual void OnTileTypesChanged();
   void OnTilesVisibilityPrefChanged();
+  void OnShortcutsMaxCountChanged();
 
   raw_ptr<Profile> profile_;
   raw_ptr<MostVisitedHandler> handler_;

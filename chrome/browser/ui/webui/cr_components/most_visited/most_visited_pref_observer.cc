@@ -39,6 +39,10 @@ MostVisitedPrefObserver::MostVisitedPrefObserver(Profile* profile,
       base::BindRepeating(
           &MostVisitedPrefObserver::OnTilesVisibilityPrefChanged,
           base::Unretained(this)));
+  pref_change_registrar_.Add(
+      ntp_prefs::kNtpShortcutsMaxCount,
+      base::BindRepeating(&MostVisitedPrefObserver::OnShortcutsMaxCountChanged,
+                          base::Unretained(this)));
   ntp_tiles::MostVisitedSites::AddEnterpriseShortcutsObserver(
       pref_change_registrar_,
       base::BindRepeating(
@@ -59,6 +63,8 @@ void MostVisitedPrefObserver::RegisterProfilePrefs(
   registry->RegisterBooleanPref(ntp_prefs::kNtpEnterpriseShortcutsVisible,
                                 false);
   registry->RegisterBooleanPref(ntp_prefs::kNtpShortcutsVisible, true);
+  registry->RegisterIntegerPref(ntp_prefs::kNtpShortcutsMaxCount,
+                                kDefaultShortcutsMaxCount);
   registry->RegisterIntegerPref(ntp_prefs::kNtpShortcutsStalenessCount, 0);
   registry->RegisterTimePref(ntp_prefs::kNtpLastShortcutsStalenessUpdate,
                              base::Time());
@@ -76,6 +82,8 @@ void MostVisitedPrefObserver::ResetProfilePrefs(PrefService* prefs) {
   prefs->SetBoolean(ntp_prefs::kNtpCustomLinksVisible, true);
   prefs->SetBoolean(ntp_prefs::kNtpEnterpriseShortcutsVisible, false);
   prefs->SetBoolean(ntp_prefs::kNtpShortcutsVisible, true);
+  prefs->SetInteger(ntp_prefs::kNtpShortcutsMaxCount,
+                    kDefaultShortcutsMaxCount);
   prefs->SetInteger(ntp_prefs::kNtpShortcutsStalenessCount, 0);
   prefs->SetTime(ntp_prefs::kNtpLastShortcutsStalenessUpdate, base::Time());
   prefs->SetBoolean(ntp_prefs::kNtpShortcutsAutoRemovalDisabled, false);
@@ -159,6 +167,11 @@ void MostVisitedPrefObserver::OnTileTypesChanged() {
 
 void MostVisitedPrefObserver::OnTilesVisibilityPrefChanged() {
   handler_->SetShortcutsVisible(IsShortcutsVisible());
+}
+
+void MostVisitedPrefObserver::OnShortcutsMaxCountChanged() {
+  // Re-sends the tiles, which carry the new count, so an open NTP updates.
+  handler_->UpdateMostVisitedInfo();
 }
 
 void MostVisitedPrefObserver::OnEnterpriseShortcutsPolicyChanged() {
