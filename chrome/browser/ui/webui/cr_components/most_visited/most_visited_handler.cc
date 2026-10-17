@@ -4,6 +4,7 @@
 
 #include "chrome/browser/ui/webui/cr_components/most_visited/most_visited_handler.h"
 
+#include <algorithm>
 #include <map>
 #include <vector>
 
@@ -440,6 +441,12 @@ void MostVisitedHandler::OnURLsAvailable(
   result->enterprise_shortcuts_enabled =
       most_visited_sites_->IsEnterpriseShortcutsEnabled();
   result->visible = most_visited_sites_->IsShortcutsVisible();
+  PrefService* prefs = profile_->GetPrefs();
+  if (prefs->FindPreference(ntp_prefs::kNtpShortcutsMaxCount)) {
+    result->max_tiles = static_cast<uint8_t>(
+        std::clamp(prefs->GetInteger(ntp_prefs::kNtpShortcutsMaxCount), 1,
+                   static_cast<int>(ntp_tiles::kMaxNumCustomLinks)));
+  }
   page_->SetMostVisitedInfo(std::move(result));
 }
 

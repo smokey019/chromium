@@ -160,6 +160,7 @@ export class SettingsAppearancePageElement extends
       colorSchemeModeOptions_: {type: Array},
       selectedColorSchemeMode_: {type: Number},
       fontSizeOptions_: {type: Array},
+      ntpShortcutsCountOptions_: {type: Array},
       pageZoomLevels_: {type: Array},
       themeSublabel_: {type: String},
       themeUrl_: {type: String},
@@ -254,6 +255,12 @@ export class SettingsAppearancePageElement extends
     {value: 20, name: loadTimeData.getString('large')},
     {value: 24, name: loadTimeData.getString('veryLarge')},
   ];
+
+  // 1 to the browser's limit (ntp_tiles::kMaxNumCustomLinks).
+  protected accessor ntpShortcutsCountOptions_: DropdownMenuOptionList =
+      Array.from(
+          {length: loadTimeData.getInteger('ntpShortcutsCountMax')},
+          (_, i) => ({value: i + 1, name: String(i + 1)}));
 
   protected accessor glassEffectOptions_: DropdownMenuOptionList = [
     {value: 'false', name: loadTimeData.getString('glassEffectClassic')},

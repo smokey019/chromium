@@ -118,6 +118,16 @@ export function getHtml(this: SettingsAppearancePageElement) {
         </settings-radio-group>
       </div>
     ` : ''}
+    <div id="ntpShortcutsCountRow" class="cr-row hr">
+      <div class="flex cr-padded-text" aria-hidden="true">
+        <div>$i18n{ntpShortcutsCount}</div>
+        <div class="secondary">$i18n{ntpShortcutsCountSublabel}</div>
+      </div>
+      <settings-dropdown-menu id="ntpShortcutsCount"
+          label="$i18n{ntpShortcutsCount}" pref-key="ntp.shortcuts_max_count"
+          .menuOptions="${this.ntpShortcutsCountOptions_}">
+      </settings-dropdown-menu>
+    </div>
     <div class="hr"
         ?hidden="${!this.showHr_(
             this.pageVisibility_.homeButton,
