@@ -34,6 +34,10 @@ inline constexpr char kNtpEnterpriseShortcutsVisible[] =
 inline constexpr char kNtpPersonalShortcutsVisible[] =
     "ntp.personal_shortcuts_visible";
 
+// The maximum number of shortcut tiles to show on the NTP, set from
+// chrome://settings/appearance. Clamped to [1, ntp_tiles::kMaxNumCustomLinks].
+inline constexpr char kNtpShortcutsMaxCount[] = "ntp.shortcuts_max_count";
+
 // Tracks whether the user has chosen to show all most visited tiles on the NTP.
 inline constexpr char kNtpShowAllMostVisitedTiles[] =
     "ntp.show_all_most_visited_tiles";

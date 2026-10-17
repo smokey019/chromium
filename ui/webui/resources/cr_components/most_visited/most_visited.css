@@ -64,6 +64,7 @@
 }
 
 #addShortcutIcon,
+#shortcutSettingsIcon,
 #showMoreIcon,
 #showLessIcon,
 .query-tile-icon {
@@ -86,6 +87,12 @@
       var(--add-shortcut-foreground-color, var(--google-grey-900));
 }
 
+#shortcutSettingsIcon {
+  -webkit-mask-image: url(chrome://resources/images/icon_settings.svg);
+  background-color:
+      var(--add-shortcut-foreground-color, var(--google-grey-900));
+}
+
 #showMoreIcon {
   -webkit-mask-image: url(chrome://resources/cr_components/most_visited/expand_content_old.svg);
   background-color:
@@ -104,6 +111,7 @@
 }
 
 :host([use-white-tile-icon_]) #addShortcutIcon,
+:host([use-white-tile-icon_]) #shortcutSettingsIcon,
 :host([use-white-tile-icon_]) #showMoreIcon,
 :host([use-white-tile-icon_]) #showLessIcon {
   background-color: white;
@@ -115,6 +123,7 @@
 
 .tile,
 #addShortcut,
+#shortcutSettings,
 #showMore,
 #showLess {
   -webkit-app-region: no-drag;
@@ -154,12 +163,14 @@
 :host-context(.focus-outline-visible):host([non-editable])
     .tile a:focus ~ .tile-icon,
 :host-context(.focus-outline-visible) #addShortcut:focus,
+:host-context(.focus-outline-visible) #shortcutSettings:focus,
 :host-context(.focus-outline-visible) #showMore:focus,
 :host-context(.focus-outline-visible) #showLess:focus {
   box-shadow: var(--most-visited-focus-shadow);
 }
 
 #addShortcut,
+#shortcutSettings,
 #showMore,
 #showLess {
   --cr-hover-background-color: transparent;
@@ -172,6 +183,7 @@
 
 :host(:not([reordering_])) .tile:hover,
 :host(:not([reordering_])) #addShortcut:hover,
+:host(:not([reordering_])) #shortcutSettings:hover,
 :host(:not([reordering_])) #showMore:hover,
 :host(:not([reordering_])) #showLess:hover,
 .force-hover {
@@ -180,9 +192,11 @@
 
 @media (forced-colors: active) {
   #addShortcutIcon,
+  #shortcutSettingsIcon,
   #showMoreIcon,
   #showLessIcon,
   :host([use-white-tile-icon_]) #addShortcutIcon,
+  :host([use-white-tile-icon_]) #shortcutSettingsIcon,
   :host([use-white-tile-icon_]) #showMoreIcon,
   :host([use-white-tile-icon_]) #showLessIcon,
   .query-tile-icon,
@@ -197,6 +211,7 @@
   :host-context(.focus-outline-visible):host([non-editable])
       .tile a:focus ~ .tile-icon,
   :host-context(.focus-outline-visible) #addShortcut:focus,
+  :host-context(.focus-outline-visible) #shortcutSettings:focus,
   :host-context(.focus-outline-visible) #showMore:focus,
   :host-context(.focus-outline-visible) #showLess:focus {
     /* Use outline instead of box-shadow (which does not work) in Windows
@@ -206,6 +221,7 @@
 
   :host(:not([reordering_])) .tile:hover,
   :host(:not([reordering_])) #addShortcut:hover,
+  :host(:not([reordering_])) #shortcutSettings:hover,
   :host(:not([reordering_])) #showMore:hover,
   :host(:not([reordering_])) #showLess:hover,
   .force-hover {
@@ -225,6 +241,7 @@
   }
 
   #addShortcut:hover .tile-icon-container,
+  #shortcutSettings:hover .tile-icon-container,
   #showMore:hover .tile-icon-container,
   #showLess:hover .tile-icon-container {
     background-color: Highlight;
@@ -232,6 +249,7 @@
   }
 
   #addShortcut:hover #addShortcutIcon,
+  #shortcutSettings:hover #shortcutSettingsIcon,
   #showMore:hover #showMoreIcon,
   #showLess:hover #showLessIcon {
     background-color: HighlightText;
@@ -333,6 +351,7 @@ cr-policy-indicator {
 
 :host([hide-title]) .tile,
 :host([hide-title]) #addShortcut,
+:host([hide-title]) #shortcutSettings,
 :host([hide-title]) #showMore,
 :host([hide-title]) #showLess {
   justify-content: center;

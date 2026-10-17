@@ -37,6 +37,9 @@ struct MostVisitedInfo {
   bool enterprise_shortcuts_enabled;
   bool visible;
   array<MostVisitedTile> tiles;
+  // The user's chosen maximum number of personal shortcut tiles (from the
+  // ntp.shortcuts_max_count pref). 0 means use the page's built-in limits.
+  uint8 max_tiles;
 };
 
 // Used to bootstrap the bidirectional communication.

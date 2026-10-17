@@ -590,6 +590,8 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
       settings_api::PrefType::kBoolean;
   (*s_allowlist)[ntp_prefs::kNtpShortcutsVisible] =
       settings_api::PrefType::kBoolean;
+  (*s_allowlist)[ntp_prefs::kNtpShortcutsMaxCount] =
+      settings_api::PrefType::kNumber;
 
   // Site Settings prefs.
   (*s_allowlist)[::content_settings::kGeneratedNotificationPref] =
