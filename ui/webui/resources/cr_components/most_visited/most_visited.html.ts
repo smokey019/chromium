@@ -69,6 +69,19 @@ export function getHtml(this: MostVisitedElement) {
       <span>${this.i18n('addLinkTitle')}</span>
     </div>
   </cr-button>
+  ${this.showShortcutSettings_ ? html`
+    <cr-button id="shortcutSettings" tabindex="0"
+        @click="${this.onShortcutSettingsClick_}"
+        aria-label="${this.i18n('shortcutSettingsTitle')}"
+        title="${this.i18n('shortcutSettingsTitle')}" noink>
+      <div class="tile-icon tile-icon-container">
+        <div id="shortcutSettingsIcon" draggable="false"></div>
+      </div>
+      <div class="tile-title" ?hidden="${this.hideTitle}">
+        <span>${this.i18n('shortcutSettingsTitle')}</span>
+      </div>
+    </cr-button>
+  ` : ''}
   <div>
     <cr-button id="showMore" tabindex="0" @click="${this.onShowMoreClick_}"
         ?hidden="${!this.showShowMore_}" @keydown="${this.onShowMoreKeydown_}"

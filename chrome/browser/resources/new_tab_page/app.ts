@@ -1870,6 +1870,11 @@ export class AppElement extends AppElementBase {
     this.showUndoToast_(undoToastContext);
   }
 
+  protected onShortcutSettingsClick_() {
+    // The shortcut count setting lives on the Appearance settings page.
+    WindowProxy.getInstance().navigate('chrome://settings/appearance');
+  }
+
   protected onModulesAutoRemoved_(
       undoToastContext: CustomEvent<{message: string, undo: () => void}>) {
     this.showUndoToast_(undoToastContext);

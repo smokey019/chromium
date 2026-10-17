@@ -7782,6 +7782,9 @@ Keep your key file in a safe place. You will need it to create new versions of y
       <message name="IDS_NTP_CUSTOM_LINKS_ADD_SHORTCUT_TITLE" desc="The title of the custom link add shortcut dialog. (On the New Tab Page)">
         Add shortcut
       </message>
+      <message name="IDS_NTP_CUSTOM_LINKS_SHORTCUT_SETTINGS" desc="Label of the tile next to 'Add shortcut' that opens the setting for how many shortcuts the New Tab Page shows. (On the New Tab Page)">
+        Shortcut settings
+      </message>
       <message name="IDS_NTP_CUSTOM_LINKS_EDIT_SHORTCUT_TOOLTIP" desc="The tooltip for editing a custom link shortcut. (On the New Tab Page)">
         Edit shortcut
       </message>

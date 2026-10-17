@@ -182,6 +182,13 @@ export class MostVisitedElement extends MostVisitedElementBase {
 
       expandableTilesEnabled: {type: Boolean, reflect: true},
       shortcutsReorderEnabled: {type: Boolean, reflect: true},
+      /**
+       * If true, shows a "Shortcut settings" button next to "Add shortcut"
+       * that fires `shortcut-settings-click`. The host must provide the
+       * `shortcutSettingsTitle` string.
+       */
+      shortcutSettingsEnabled: {type: Boolean, reflect: true},
+      showShortcutSettings_: {type: Boolean, state: true},
       maxTilesInCollapsedState: {type: Number, reflect: true},
       maxShortcutsInExpandedState: {type: Number, reflect: true},
       maxMostVisitedTilesInExpandedState: {type: Number, reflect: true},
@@ -214,6 +221,7 @@ export class MostVisitedElement extends MostVisitedElementBase {
   accessor singleRow: boolean = false;
   accessor expandableTilesEnabled: boolean = false;
   accessor shortcutsReorderEnabled: boolean = false;
+  accessor shortcutSettingsEnabled: boolean = false;
   accessor maxTilesInCollapsedState: number = 6;
   accessor maxShortcutsInExpandedState: number = 10;
   accessor maxMostVisitedTilesInExpandedState: number = 8;
@@ -245,6 +253,10 @@ export class MostVisitedElement extends MostVisitedElementBase {
   private accessor maxTiles_: number = 0;
   private accessor maxVisibleTiles_: number = 0;
   protected accessor showAdd_: boolean = false;
+  protected accessor showShortcutSettings_: boolean = false;
+  // Max personal (non-enterprise) tiles: the user's chosen count if the
+  // browser sent one, otherwise the built-in limit for the current mode.
+  private maxPersonalTiles_: number = 0;
   private accessor maxVisibleColumnCount_: number = 0;
   protected accessor tiles_: MostVisitedTile[] = [];
   protected accessor toastSource_: TileSource = TileSource.CUSTOM_LINKS;
@@ -355,9 +367,12 @@ export class MostVisitedElement extends MostVisitedElementBase {
       this.visible_ = this.info_.visible;
       this.customLinksEnabled_ = this.info_.customLinksEnabled;
       this.enterpriseShortcutsEnabled_ = this.info_.enterpriseShortcutsEnabled;
-      const totalMax =
-          (this.customLinksEnabled_ ? this.maxShortcutsInExpandedState :
-                                      this.maxMostVisitedTilesInExpandedState) +
+      const builtInMax = this.customLinksEnabled_ ?
+          this.maxShortcutsInExpandedState :
+          this.maxMostVisitedTilesInExpandedState;
+      this.maxPersonalTiles_ =
+          this.info_.maxTiles > 0 ? this.info_.maxTiles : builtInMax;
+      const totalMax = this.maxPersonalTiles_ +
           (this.enterpriseShortcutsEnabled_ ? this.maxEnterpriseShortcuts : 0);
       this.maxTiles_ =
           this.maxTiles > 0 ? Math.min(this.maxTiles, totalMax) : totalMax;
@@ -367,6 +382,7 @@ export class MostVisitedElement extends MostVisitedElementBase {
     this.showShowMore_ = this.computeShowShowMore_();
     this.showShowLess_ = this.computeShowShowLess_();
     this.showAdd_ = this.computeShowAdd_();
+    this.showShortcutSettings_ = this.computeShowShortcutSettings_();
     this.columnCount_ = this.computeColumnCount_();
     this.rowCount_ = this.computeRowCount_();
 
@@ -441,7 +457,8 @@ export class MostVisitedElement extends MostVisitedElementBase {
     const visibleShortcutCount =
         canShowShowMore ? this.maxTilesInCollapsedState : shortcutCount;
     const totalTileCount = visibleShortcutCount + (canShowAdd ? 1 : 0) +
-        (canShowShowMore || canShowShowLess ? 1 : 0);
+        (canShowShowMore || canShowShowLess ? 1 : 0) +
+        (this.showShortcutSettings_ ? 1 : 0);
     const columnCount = totalTileCount <= this.maxVisibleColumnCount_ ?
         totalTileCount :
         Math.min(
@@ -462,7 +479,8 @@ export class MostVisitedElement extends MostVisitedElementBase {
           this.tiles_.length;
       return Math.ceil(
           (visibleShortcutCount + (this.showAdd_ ? 1 : 0) +
-           (this.showShowMore_ || this.showShowLess_ ? 1 : 0)) /
+           (this.showShowMore_ || this.showShowLess_ ? 1 : 0) +
+           (this.showShortcutSettings_ ? 1 : 0)) /
           this.columnCount_);
     }
 
@@ -501,7 +519,16 @@ export class MostVisitedElement extends MostVisitedElementBase {
     return this.tiles_.length < (this.expandableTilesEnabled && this.showAll_ ?
                                      this.maxTiles_ :
                                      this.maxVisibleTiles_) &&
-        customLinkTilesCount < this.maxShortcutsInExpandedState;
+        customLinkTilesCount < this.maxPersonalTiles_;
+  }
+
+  private computeShowShortcutSettings_(): boolean {
+    return this.shortcutSettingsEnabled && !this.nonEditable &&
+        !this.showShowMore_;
+  }
+
+  protected onShortcutSettingsClick_() {
+    this.fire('shortcut-settings-click');
   }
 
   private computeShowShowMore_(): boolean {

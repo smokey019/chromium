@@ -123,8 +123,10 @@ import {SubmitButtonIconType} from '//resources/cr_components/composebox/compose
               max-most-visited-tiles-in-expanded-state="${this.maxMostVisitedTilesInExpandedState_}"
               max-enterprise-shortcuts="${this.maxEnterpriseShortcuts_}"
               ?shortcuts-reorder-enabled="${this.shortcutsReorderEnabled_}"
+              shortcut-settings-enabled
               .containerWidth="${this.rhsWidth_}"
-              @most-visited-auto-removed="${this.onMostVisitedAutoRemoved_}">
+              @most-visited-auto-removed="${this.onMostVisitedAutoRemoved_}"
+              @shortcut-settings-click="${this.onShortcutSettingsClick_}">
           </cr-most-visited>
         ` : ''}
         ${this.modulesEnabled_ ? html`

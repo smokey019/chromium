@@ -431,6 +431,7 @@ base::DictValue NewTabPageUI::GetLoadTimeData(
 
       // Custom Links.
       {"addLinkTitle", IDS_NTP_CUSTOM_LINKS_ADD_SHORTCUT_TITLE},
+      {"shortcutSettingsTitle", IDS_NTP_CUSTOM_LINKS_SHORTCUT_SETTINGS},
       {"editLinkTitle", IDS_NTP_CUSTOM_LINKS_EDIT_SHORTCUT},
       {"viewLinkTitle", IDS_NTP_CUSTOM_LINKS_SHORTCUT_DETAILS_TITLE},
       {"invalidUrl", IDS_NTP_CUSTOM_LINKS_INVALID_URL},

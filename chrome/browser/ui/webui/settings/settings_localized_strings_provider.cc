@@ -92,6 +92,7 @@
 #include "components/history/core/common/pref_names.h"
 #include "components/lens/lens_features.h"
 #include "components/live_caption/caption_util.h"
+#include "components/ntp_tiles/constants.h"
 #include "components/password_manager/core/browser/leak_detection_dialog_utils.h"
 #include "components/password_manager/core/browser/manage_passwords_referrer.h"
 #include "components/performance_manager/public/features.h"
@@ -618,6 +619,8 @@ void AddAppearanceStrings(content::WebUIDataSource* html_source,
       {"darkMode", IDS_NTP_CUSTOMIZE_CHROME_COLOR_SCHEME_MODE_DARK_LABEL},
       {"systemMode", IDS_NTP_CUSTOMIZE_CHROME_COLOR_SCHEME_MODE_SYSTEM_LABEL},
       {"showHomeButton", IDS_SETTINGS_SHOW_HOME_BUTTON},
+      {"ntpShortcutsCount", IDS_SETTINGS_NTP_SHORTCUTS_COUNT},
+      {"ntpShortcutsCountSublabel", IDS_SETTINGS_NTP_SHORTCUTS_COUNT_SUBLABEL},
       {"showBookmarksBar", IDS_SETTINGS_SHOW_BOOKMARKS_BAR},
       {"bookmarksBar", IDS_SETTINGS_BOOKMARKS_BAR},
       {"bookmarksBarAlwaysShow", IDS_SETTINGS_BOOKMARKS_BAR_ALWAYS_SHOW},
@@ -693,6 +696,8 @@ void AddAppearanceStrings(content::WebUIDataSource* html_source,
   html_source->AddBoolean("ntpSimplificationBookmarksBarEnabled",
                           base::FeatureList::IsEnabled(
                               ntp_features::kNtpSimplificationBookmarkBar));
+  html_source->AddInteger("ntpShortcutsCountMax",
+                          static_cast<int>(ntp_tiles::kMaxNumCustomLinks));
 
   html_source->AddString("presetZoomFactors",
                          zoom::GetPresetZoomFactorsAsJSON());
