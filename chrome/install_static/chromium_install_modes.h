@@ -21,7 +21,7 @@ inline constexpr wchar_t kCompanyPathName[] = L"";
 
 // The brand-specific product name to be included as a component of the install
 // and user data directory paths.
-inline constexpr wchar_t kProductPathName[] = L"Chromium";
+inline constexpr wchar_t kProductPathName[] = L"LEET Browser";
 
 // The brand-specific safe browsing client name.
 inline constexpr char kSafeBrowsingName[] = "chromium";
@@ -33,15 +33,6 @@ enum InstallConstantIndex {
   NUM_INSTALL_MODES,
 };
 
-inline constexpr auto kOldTracingServiceIids = std::to_array<IID>({
-    // Replaced in 2026-09. Delete after 2028-09.
-    // {A3FD580A-FFD4-4075-9174-75D0B199D3CB}
-    {0xa3fd580a,
-     0xffd4,
-     0x4075,
-     {0x91, 0x74, 0x75, 0xd0, 0xb1, 0x99, 0xd3, 0xcb}},
-});
-
 inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
     // The primary (and only) install mode for Chromium.
     {
@@ -52,30 +43,30 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
         .install_suffix =
             L"",  // Empty install_suffix for the primary install mode.
         .logo_suffix = L"",  // No logo suffix for the primary install mode.
-        .app_guid =
-            L"",  // Empty app_guid since no integration with Google Update.
-        .base_app_name = L"Chromium",              // A distinct base_app_name.
-        .base_app_id = L"Chromium",                // A distinct base_app_id.
-        .browser_prog_id_prefix = L"ChromiumHTM",  // Browser ProgID prefix.
+        // LEET: must match browser_appid in chrome/updater/branding.gni.
+        .app_guid = L"{FFF3E393-9DAE-4711-958F-8F1B32972F9B}",
+        .base_app_name = L"LEET Browser",      // A distinct base_app_name.
+        .base_app_id = L"LEETBrowser",         // A distinct base_app_id.
+        .browser_prog_id_prefix = L"LEETHTM",  // Browser ProgID prefix.
         .browser_prog_id_description =
-            L"Chromium HTML Document",  // Browser ProgID description.
-        .direct_launch_url_scheme = "chromium",
-        .pdf_prog_id_prefix = L"ChromiumPDF",  // PDF ProgID prefix.
+            L"LEET HTML Document",  // Browser ProgID description.
+        .direct_launch_url_scheme = "leetbrowser",
+        .pdf_prog_id_prefix = L"LEETPDF",  // PDF ProgID prefix.
         .pdf_prog_id_description =
-            L"Chromium PDF Document",  // PDF ProgID description.
+            L"LEET PDF Document",  // PDF ProgID description.
         .active_setup_guid =
-            L"{7D2B3E1D-D096-4594-9D8F-A6667F12E0AC}",  // Active Setup
+            L"{C424A6A8-3C7C-4600-8427-64C74CA034FC}",  // Active Setup
                                                         // GUID.
-        .toast_activator_clsid = {0x635EFA6F,
-                                  0x08D6,
-                                  0x4EC9,
-                                  {0xBD, 0x14, 0x8A, 0x0F, 0xDE, 0x97, 0x51,
-                                   0x59}},  // Toast Activator CLSID.
-        .elevator_clsid = {0xD133B120,
-                           0x6DB4,
-                           0x4D6B,
-                           {0x8B, 0xFE, 0x83, 0xBF, 0x8C, 0xA1, 0xB1,
-                            0xB0}},  // Elevator CLSID.
+        .toast_activator_clsid = {0x3876F57F,
+                                  0xE1A6,
+                                  0x4B9B,
+                                  {0x84, 0xA3, 0x72, 0x33, 0x67, 0xFE, 0x35,
+                                   0x12}},  // Toast Activator CLSID.
+        .elevator_clsid = {0xFEBB2EE4,
+                           0x6F68,
+                           0x485C,
+                           {0x99, 0x80, 0xF0, 0xC2, 0xE8, 0x33, 0x2E,
+                            0x5F}},  // Elevator CLSID.
         .elevator_iid = {0xbb19a0e5,
                          0xc6,
                          0x4966,
@@ -83,21 +74,20 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
                           0x3a}},  // IElevator IID and TypeLib
         // {BB19A0E5-00C6-4966-94B2-5AFEC6FED93A}.
         .old_elevator_iids = {},
-        .tracing_service_clsid = {0x83f69367,
-                                  0x442d,
-                                  0x447f,
-                                  {0x8b, 0xcc, 0x0e, 0x3f, 0x97, 0xbe, 0x9c,
-                                   0xf2}},  // SystemTraceSession CLSID.
+        .tracing_service_clsid = {0xEF645E45,
+                                  0x9427,
+                                  0x4F31,
+                                  {0x90, 0xB7, 0x98, 0xCB, 0xB0, 0x76, 0x20,
+                                   0xFD}},  // SystemTraceSession CLSID.
         .tracing_service_iid = {0xe0b03e2d,
                                 0x7682,
                                 0x4d83,
                                 {0xb9, 0xff, 0x45, 0x74, 0xaf, 0x72, 0x05,
                                  0x00}},  // ISystemTraceSessionChromium IID and
                                           // TypeLib
-        .old_tracing_service_iids = kOldTracingServiceIids,
-        .default_channel_name =
-            L"",  // Empty default channel name since no update integration.
-        .channel_strategy = ChannelStrategy::UNSUPPORTED,
+        .old_tracing_service_iids = {},
+        .default_channel_name = L"",  // Empty default channel name (stable).
+        .channel_strategy = ChannelStrategy::FLOATING,
         .supports_system_level = true,  // Supports system-level installs.
         .supports_set_as_default_browser =
             true,  // Supports in-product set as default browser UX.
@@ -111,7 +101,7 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
         .sandbox_sid_prefix =
             L"S-1-15-2-3251537155-1984446955-2931258699-841473695-"
             L"1938553385-"
-            L"924012148-",  // App container sid prefix for sandbox.
+            L"924012160-",  // App container sid prefix for sandbox.
     },
 });
 

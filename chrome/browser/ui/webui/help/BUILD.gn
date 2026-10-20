@@ -2,6 +2,7 @@
 # Use of this source code is governed by a BSD-style license that can be
 # found in the LICENSE file.
 
+import("//chrome/browser/buildflags.gni")
 import("//chrome/common/features.gni")
 
 source_set("help") {
@@ -53,7 +54,7 @@ source_set("help") {
   }
 
   if (is_win) {
-    if (is_chrome_branded) {
+    if (is_chrome_branded || enable_updater) {
       sources = [ "version_updater_win.cc" ]
       deps += [
         "//chrome/app:generated_resources_grit",

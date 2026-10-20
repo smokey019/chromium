@@ -377,8 +377,9 @@ namespace env_vars {
 
 // The presence of this environment variable with a value of 1 implies that
 // setup.exe should run as a system installation regardless of what is on the
-// command line.
-inline constexpr char kGoogleUpdateIsMachineEnvVar[] = "GoogleUpdateIsMachine";
+// command line. LEET: the LEET updater sets
+// <updater_company_short_name>UpdateIsMachine.
+inline constexpr char kGoogleUpdateIsMachineEnvVar[] = "LEETUpdateIsMachine";
 
 }  // namespace env_vars
 

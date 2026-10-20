@@ -77,6 +77,7 @@ class Configurator : public update_client::Configurator {
   scoped_refptr<update_client::PatcherFactory> GetPatcherFactory() override;
   bool EnabledBackgroundDownloader() const override;
   bool EnabledCupSigning() const override;
+  std::optional<update_client::CupKey> GetCupKey() const override;
   PrefService* GetPrefService() const override;
   update_client::PersistedData* GetPersistedData() const override;
   bool IsPerUserInstall() const override;

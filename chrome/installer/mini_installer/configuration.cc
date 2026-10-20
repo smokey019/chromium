@@ -22,12 +22,13 @@ namespace mini_installer {
 
 namespace {
 
-// Returns true if GoogleUpdateIsMachine=1 is present in the environment.
+// Returns true if LEETUpdateIsMachine=1 is present in the environment. The LEET
+// updater sets <updater_company_short_name>UpdateIsMachine.
 bool GetGoogleUpdateIsMachineEnvVar() {
   const DWORD kBufferSize = 2;
   StackString<kBufferSize> value;
-  DWORD length = ::GetEnvironmentVariableW(L"GoogleUpdateIsMachine",
-                                           value.get(), kBufferSize);
+  DWORD length = ::GetEnvironmentVariableW(L"LEETUpdateIsMachine", value.get(),
+                                           kBufferSize);
   return length == 1 && *value.get() == L'1';
 }
 
