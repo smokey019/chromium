@@ -4,6 +4,7 @@
 
 import("//build/buildflag_header.gni")
 import("//build/config/chrome_build.gni")
+import("//chrome/browser/buildflags.gni")
 import("//chrome/process_version_rc_template.gni")
 import("//services/webnn/features.gni")
 import("//testing/test.gni")
@@ -143,7 +144,9 @@ if (is_win) {
       deps += [ "//services/webnn/public/cpp:win" ]
     }
 
-    if (is_chrome_branded) {
+    # Used whenever setup integrates with an updater
+    # (USE_GOOGLE_UPDATE_INTEGRATION).
+    if (is_chrome_branded || enable_updater) {
       sources += [
         "channel_override_work_item.cc",
         "channel_override_work_item.h",
