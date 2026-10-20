@@ -564,7 +564,7 @@ BASE_FEATURE(kDocumentPictureInPictureReparenting,
 BASE_FEATURE(kEnableRtcpReporting, base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables user control over muting tab audio from the tab strip.
-BASE_FEATURE(kEnableTabMuting, base::FEATURE_DISABLED_BY_DEFAULT);
+BASE_FEATURE(kEnableTabMuting, base::FEATURE_ENABLED_BY_DEFAULT);
 
 // Enables tracking the occlusion of HW secure encrypted video elements.
 // The HW secure check is OS agnostic, but this switch is currently only

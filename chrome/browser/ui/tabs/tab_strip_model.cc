@@ -209,6 +209,7 @@ bool ShouldActivateWindowForContextMenuCommand(
     case TabStripModel::CommandTogglePinned:
     case TabStripModel::CommandToggleGrouped:
     case TabStripModel::CommandToggleSiteMuted:
+    case TabStripModel::CommandToggleTabMuted:
     case TabStripModel::CommandSendTabToSelf:
     case TabStripModel::CommandAddToReadLater:
     case TabStripModel::CommandAddToNewGroup:
@@ -2887,6 +2888,9 @@ bool TabStripModel::IsContextMenuCommandEnabled(
 
     case CommandToggleVertical:
       return true;
+
+    case CommandToggleTabMuted:
+      return true;
   }
   SCOPED_CRASH_KEY_NUMBER("TabStripModel", "command_id", command_id);
   NOTREACHED() << "Unsupported command: " << command_id;
@@ -3090,6 +3094,12 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
             UserMetricsAction("SoundContentSetting.UnmuteBy.TabStrip"));
       }
       SetSitesMuted(GetTabsForCommand(context_tab), mute);
+      break;
+    }
+
+    case CommandToggleTabMuted: {
+      SetTabsMuted(GetTabsForCommand(context_tab),
+                   WillContextMenuMuteTabs(context_tab));
       break;
     }
 
@@ -3611,6 +3621,27 @@ void TabStripModel::ExecuteCloseTabsCommand(
 
 bool TabStripModel::WillContextMenuMuteSites(tabs::TabHandle context_tab) {
   return !AreAllSitesMuted(GetTabsForCommand(context_tab));
+}
+
+bool TabStripModel::WillContextMenuMuteTabs(tabs::TabHandle context_tab) {
+  // If all tabs are muted, then we unmute, otherwise we mute.
+  return !std::ranges::all_of(
+      GetTabsForCommand(context_tab), [](tabs::TabHandle handle) {
+        tabs::TabInterface* tab = handle.Get();
+        return !tab || tab->GetContents()->IsAudioMuted();
+      });
+}
+
+void TabStripModel::SetTabsMuted(const std::vector<tabs::TabHandle>& tabs,
+                                 bool mute) const {
+  for (tabs::TabHandle handle : tabs) {
+    tabs::TabInterface* tab = handle.Get();
+    if (!tab || static_cast<tabs::TabModel*>(tab)->owning_model() != this) {
+      continue;
+    }
+    SetTabAudioMuted(tab->GetContents(), mute, TabMutedReason::kAudioIndicator,
+                     std::string());
+  }
 }
 
 bool TabStripModel::WillContextMenuPin(tabs::TabHandle context_tab) {

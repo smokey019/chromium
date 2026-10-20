@@ -848,6 +848,14 @@ class TabStripModel {
   // Sets the sound content setting for each site for `tabs`.
   void SetSitesMuted(const std::vector<tabs::TabHandle>& tabs, bool mute) const;
 
+  // Returns true if 'CommandToggleTabMuted' will mute. `context_tab` is the
+  // tab supplied to `ExecuteContextMenuCommand`.
+  bool WillContextMenuMuteTabs(tabs::TabHandle context_tab);
+
+  // Mutes or unmutes `tabs`, without changing the sound content setting for
+  // their sites.
+  void SetTabsMuted(const std::vector<tabs::TabHandle>& tabs, bool mute) const;
+
   // Returns true if 'CommandTogglePinned' will pin. `context_tab` is the tab
   // supplied to `ExecuteContextMenuCommand`.
   bool WillContextMenuPin(tabs::TabHandle context_tab);
