@@ -17,6 +17,7 @@
 #include "base/memory/ref_counted.h"
 #include "base/sequence_checker.h"
 #include "components/client_update_protocol/cup.h"
+#include "components/update_client/configurator.h"
 #include "components/update_client/network.h"
 #include "url/gurl.h"
 
@@ -37,7 +38,9 @@ class RequestSender : public base::RefCountedThreadSafe<RequestSender> {
   using RequestSenderCallback = base::OnceCallback<
       void(int error, const std::string& response, int retry_after_sec)>;
 
-  explicit RequestSender(scoped_refptr<NetworkFetcherFactory> fetcher_factory);
+  // |cup_key| overrides the built-in CUP key when set.
+  explicit RequestSender(scoped_refptr<NetworkFetcherFactory> fetcher_factory,
+                         std::optional<CupKey> cup_key = std::nullopt);
 
   RequestSender(const RequestSender&) = delete;
   RequestSender& operator=(const RequestSender&) = delete;

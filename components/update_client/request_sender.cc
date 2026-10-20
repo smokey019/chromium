@@ -177,7 +177,10 @@ const std::string& SelectCupServerProof(
   return response_cup_server_proof;
 }
 
-client_update_protocol::Cup BuildSigner() {
+client_update_protocol::Cup BuildSigner(const std::optional<CupKey>& cup_key) {
+  if (cup_key) {
+    return client_update_protocol::Cup(cup_key->version, cup_key->spki);
+  }
   return client_update_protocol::Cup(kCupKeyVersion,
                                      base::as_byte_span(kCupPublicKey));
 }
@@ -185,8 +188,9 @@ client_update_protocol::Cup BuildSigner() {
 }  // namespace
 
 RequestSender::RequestSender(
-    scoped_refptr<NetworkFetcherFactory> fetcher_factory)
-    : fetcher_factory_(fetcher_factory), signer_(BuildSigner()) {}
+    scoped_refptr<NetworkFetcherFactory> fetcher_factory,
+    std::optional<CupKey> cup_key)
+    : fetcher_factory_(fetcher_factory), signer_(BuildSigner(cup_key)) {}
 
 RequestSender::~RequestSender() = default;
 
