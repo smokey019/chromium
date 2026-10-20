@@ -13,11 +13,13 @@ const wchar_t kGoogleUpdateUpgradeCode[] =
 
 const wchar_t kGoogleUpdateSetupExe[] = L"GoogleUpdateSetup.exe";
 
-const wchar_t kRegPathClients[] = L"Software\\Google\\Update\\Clients";
-const wchar_t kRegPathClientState[] = L"Software\\Google\\Update\\ClientState";
+// LEET: these match the LEET updater's registry root, which comes from
+// updater_company_short_name in chrome/updater/branding.gni.
+const wchar_t kRegPathClients[] = L"Software\\LEET\\Update\\Clients";
+const wchar_t kRegPathClientState[] = L"Software\\LEET\\Update\\ClientState";
 const wchar_t kRegPathClientStateMedium[] =
-    L"Software\\Google\\Update\\ClientStateMedium";
-const wchar_t kRegPathGoogleUpdate[] = L"Software\\Google\\Update";
+    L"Software\\LEET\\Update\\ClientStateMedium";
+const wchar_t kRegPathGoogleUpdate[] = L"Software\\LEET\\Update";
 
 const wchar_t kRegCommandsKey[] = L"Commands";
 
