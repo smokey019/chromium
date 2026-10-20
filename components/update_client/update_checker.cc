@@ -262,7 +262,8 @@ void UpdateCheckerImpl::CheckForUpdatesHelper(
       additional_attributes, updater_state_attributes, std::move(apps));
 
   cancellation_->OnCancel(
-      base::MakeRefCounted<RequestSender>(config_->GetNetworkFetcherFactory())
+      base::MakeRefCounted<RequestSender>(config_->GetNetworkFetcherFactory(),
+                                          config_->GetCupKey())
           ->Send({url},
                  BuildUpdateCheckExtraRequestHeaders(
                      config_->GetProdId(), config_->GetBrowserVersion(),
