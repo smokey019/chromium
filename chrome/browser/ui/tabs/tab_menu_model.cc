@@ -584,6 +584,26 @@ void TabMenuModel::Build(int index) {
             ui::kColorMenuIcon, ui::SimpleMenuModel::kDefaultIconSize));
   }
 
+  // Mutes only the tab(s), leaving the site's sound setting alone.
+  const bool will_mute_tabs = tab_strip_->WillContextMenuMuteTabs(index);
+  AddItem(TabStripModel::CommandToggleTabMuted,
+          l10n_util::GetPluralStringFUTF16(
+              will_mute_tabs ? IDS_TAB_CXMENU_SOUND_MUTE_TAB
+                             : IDS_TAB_CXMENU_SOUND_UNMUTE_TAB,
+              num_mute_tabs));
+  if (features::IsMenuSimplificationEnabled()) {
+    SetIconForCommandId(
+        TabStripModel::CommandToggleTabMuted,
+        ui::ImageModel::FromVectorIcon(
+            will_mute_tabs ? features::IsRoundedIconsEnabled()
+                                 ? vector_icons::kVolumeOffIcon
+                                 : vector_icons::kVolumeOffChromeRefreshOldIcon
+            : features::IsRoundedIconsEnabled()
+                ? vector_icons::kVolumeUpIcon
+                : vector_icons::kVolumeUpChromeRefreshOldIcon,
+            ui::kColorMenuIcon, ui::SimpleMenuModel::kDefaultIconSize));
+  }
+
   const bool show_glic_items =
       glic::GlicEnabling::IsReadyForProfile(tab_strip_->profile());
   const std::vector<tabs::TabInterface*> tabs =

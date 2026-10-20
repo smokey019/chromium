@@ -2824,6 +2824,9 @@ bool TabStripModel::IsContextMenuCommandEnabled(
 
     case CommandToggleVertical:
       return true;
+
+    case CommandToggleTabMuted:
+      return true;
   }
   SCOPED_CRASH_KEY_NUMBER("TabStripModel", "command_id", command_id);
   NOTREACHED() << "Unsupported command: " << command_id;
@@ -3024,6 +3027,12 @@ void TabStripModel::ExecuteContextMenuCommand(int context_index,
             UserMetricsAction("SoundContentSetting.UnmuteBy.TabStrip"));
       }
       SetSitesMuted(GetIndicesForCommand(context_index), mute);
+      break;
+    }
+
+    case CommandToggleTabMuted: {
+      SetTabsMuted(GetIndicesForCommand(context_index),
+                   WillContextMenuMuteTabs(context_index));
       break;
     }
 
@@ -3521,6 +3530,21 @@ void TabStripModel::ExecuteCloseTabsCommand(
 
 bool TabStripModel::WillContextMenuMuteSites(int index) {
   return !AreAllSitesMuted(*this, GetIndicesForCommand(index));
+}
+
+bool TabStripModel::WillContextMenuMuteTabs(int index) {
+  // If all tabs are muted, then we unmute, otherwise we mute.
+  return !std::ranges::all_of(GetIndicesForCommand(index), [&](int i) {
+    return GetWebContentsAt(i)->IsAudioMuted();
+  });
+}
+
+void TabStripModel::SetTabsMuted(const std::vector<int>& indices,
+                                 bool mute) const {
+  for (int tab_index : indices) {
+    SetTabAudioMuted(GetWebContentsAt(tab_index), mute,
+                     TabMutedReason::kAudioIndicator, std::string());
+  }
 }
 
 bool TabStripModel::WillContextMenuPin(int index) {
