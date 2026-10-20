@@ -11,17 +11,19 @@ namespace install_static {
 namespace {
 
 #if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
+// LEET: the LEET updater's registry root (updater_company_short_name in
+// chrome/updater/branding.gni).
 std::wstring GetClientsKeyPathForApp(const wchar_t* app_guid) {
-  return std::wstring(L"Software\\Google\\Update\\Clients\\").append(app_guid);
+  return std::wstring(L"Software\\LEET\\Update\\Clients\\").append(app_guid);
 }
 
 std::wstring GetClientStateKeyPathForApp(const wchar_t* app_guid) {
-  return std::wstring(L"Software\\Google\\Update\\ClientState\\")
+  return std::wstring(L"Software\\LEET\\Update\\ClientState\\")
       .append(app_guid);
 }
 
 std::wstring GetClientStateMediumKeyPathForApp(const wchar_t* app_guid) {
-  return std::wstring(L"Software\\Google\\Update\\ClientStateMedium\\")
+  return std::wstring(L"Software\\LEET\\Update\\ClientStateMedium\\")
       .append(app_guid);
 }
 #else

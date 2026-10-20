@@ -23,7 +23,7 @@
 #include "base/threading/thread_restrictions.h"
 #include "base/time/time.h"
 #include "base/win/registry.h"
-#include "build/branding_buildflags.h"
+#include "chrome/install_static/buildflags.h"
 #include "chrome/install_static/install_util.h"
 #include "chrome/installer/util/additional_parameters.h"
 #include "chrome/installer/util/install_util.h"
@@ -33,7 +33,7 @@ using base::win::RegKey;
 using installer::InstallationState;
 
 const wchar_t GoogleUpdateSettings::kPoliciesKey[] =
-    L"SOFTWARE\\Policies\\Google\\Update";
+    L"SOFTWARE\\Policies\\LEET\\Update";
 const wchar_t GoogleUpdateSettings::kUpdatePolicyValue[] = L"UpdateDefault";
 const wchar_t GoogleUpdateSettings::kDownloadPreferencePolicyValue[] =
     L"DownloadPreference";
@@ -47,7 +47,7 @@ const int GoogleUpdateSettings::kCheckPeriodOverrideMinutesMax =
 
 const GoogleUpdateSettings::UpdatePolicy
     GoogleUpdateSettings::kDefaultUpdatePolicy =
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
         GoogleUpdateSettings::AUTOMATIC_UPDATES;
 #else
         GoogleUpdateSettings::UPDATES_DISABLED;
@@ -174,7 +174,7 @@ bool RemoveUserGoogleUpdateStrKey(const wchar_t* const name) {
          key.DeleteValue(name) == ERROR_SUCCESS;
 }
 
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
 // Populates |update_policy| with the UpdatePolicy enum value corresponding to a
 // DWORD read from the registry and returns true if |value| is within range.
 // If |value| is out of range, returns false without modifying |update_policy|.
@@ -193,7 +193,7 @@ bool GetUpdatePolicyFromDword(
   }
   return false;
 }
-#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#endif  // BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
 
 // Returns the stats consent tristate held in the registry keys given by the two
 // functions |state_key_fn_ptr| and |state_medium_key_fn_ptr|. The state is read
@@ -480,7 +480,7 @@ GoogleUpdateSettings::UpdatePolicy GoogleUpdateSettings::GetAppUpdatePolicy(
   bool found_override = false;
   UpdatePolicy update_policy = kDefaultUpdatePolicy;
 
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
   DCHECK(!app_guid.empty());
   RegKey policy_key;
 
@@ -502,7 +502,7 @@ GoogleUpdateSettings::UpdatePolicy GoogleUpdateSettings::GetAppUpdatePolicy(
       GetUpdatePolicyFromDword(value, &update_policy);
     }
   }
-#endif  // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#endif  // BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
 
   if (is_overridden != nullptr) {
     *is_overridden = found_override;
@@ -513,7 +513,7 @@ GoogleUpdateSettings::UpdatePolicy GoogleUpdateSettings::GetAppUpdatePolicy(
 
 // static
 bool GoogleUpdateSettings::AreAutoupdatesEnabled() {
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
   // Check the auto-update check period override. If it is 0 or exceeds the
   // maximum timeout, then for all intents and purposes auto updates are
   // disabled.
@@ -530,15 +530,15 @@ bool GoogleUpdateSettings::AreAutoupdatesEnabled() {
   UpdatePolicy app_policy =
       GetAppUpdatePolicy(install_static::GetAppGuid(), nullptr);
   return app_policy == AUTOMATIC_UPDATES || app_policy == AUTO_UPDATES_ONLY;
-#else   // BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#else   // BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
   // Chromium does not auto update.
   return false;
-#endif  // !BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#endif  // !BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
 }
 
 // static
 bool GoogleUpdateSettings::ReenableAutoupdates() {
-#if BUILDFLAG(GOOGLE_CHROME_BRANDING)
+#if BUILDFLAG(USE_GOOGLE_UPDATE_INTEGRATION)
   int needs_reset_count = 0;
   int did_reset_count = 0;
 
