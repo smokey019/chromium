@@ -5,6 +5,8 @@
 #ifndef COMPONENTS_UPDATE_CLIENT_CONFIGURATOR_H_
 #define COMPONENTS_UPDATE_CLIENT_CONFIGURATOR_H_
 
+#include <stdint.h>
+
 #include <memory>
 #include <optional>
 #include <string>
@@ -12,6 +14,7 @@
 #include <vector>
 
 #include "base/containers/flat_map.h"
+#include "base/containers/span.h"
 #include "base/files/file_path.h"
 #include "base/functional/callback_forward.h"
 #include "base/memory/ref_counted.h"
@@ -34,6 +37,12 @@ class PatcherFactory;
 class PersistedData;
 class ProtocolHandlerFactory;
 class UnzipperFactory;
+
+// A CUP public key: its key version and its ML-DSA-44 SubjectPublicKeyInfo.
+struct CupKey {
+  int version = 0;
+  base::span<const uint8_t> spki;
+};
 
 using UpdaterStateAttributes = base::flat_map<std::string, std::string>;
 using UpdaterStateProvider =
@@ -113,6 +122,12 @@ class Configurator : public base::RefCountedThreadSafe<Configurator> {
 
   // True if signing of update checks is enabled.
   virtual bool EnabledCupSigning() const = 0;
+
+  // Returns the CUP key used to verify signed update check responses, or
+  // nullopt to use the built-in key. LEET: lets the LEET updater verify
+  // responses from its own server without changing the component updater's
+  // key.
+  virtual std::optional<CupKey> GetCupKey() const;
 
   // Returns a PrefService that the update_client can use to store persistent
   // update information. The PrefService must outlive the entire update_client,
