@@ -90,6 +90,7 @@ export class SettingsMenuElement extends SettingsMenuElementBase {
       ['/autofill', 'SettingsMenu_AutofillClicked'],
       ['/privacy', 'SettingsMenu_PrivacyClicked'],
       ['/performance', 'SettingsMenu_PerformanceClicked'],
+      ['/adblock', 'SettingsMenu_AdblockClicked'],
       ['/ai', 'SettingsMenu_AiPageEntryPointClicked'],
       ['/appearance', 'SettingsMenu_AppearanceClicked'],
       ['/search', 'SettingsMenu_SearchClicked'],

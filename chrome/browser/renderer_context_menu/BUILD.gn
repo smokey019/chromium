@@ -78,6 +78,7 @@ source_set("impl") {
   sources = [ "context_menu_content_type_factory.cc" ]
 
   deps = [
+    "//chrome/browser/reba_adblock",
     ":renderer_context_menu",
     "//base",
     "//base:i18n",

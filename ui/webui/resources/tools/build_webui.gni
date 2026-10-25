@@ -677,6 +677,9 @@ template("build_webui") {
         not_needed([ "no_explicit_any_exceptions" ])
       }
     }
+  } else {
+    # The lint is off (see enable_type_aware_eslint_checks).
+    not_needed([ "is_ash_webui" ])
   }
 
   if (enable_source_maps) {

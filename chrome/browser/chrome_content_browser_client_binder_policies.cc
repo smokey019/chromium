@@ -7,6 +7,7 @@
 #include "chrome/browser/ui/webui/bluetooth_internals/bluetooth_internals.mojom.h"
 #include "components/autofill/content/common/mojom/autofill_driver.mojom.h"
 #include "components/page_load_metrics/common/page_load_metrics.mojom.h"
+#include "components/reba_adblock/common/reba_adblock.mojom.h"
 #include "components/subresource_filter/content/mojom/subresource_filter.mojom.h"
 #include "extensions/buildflags/buildflags.h"
 #include "third_party/blink/public/common/features.h"
@@ -27,6 +28,14 @@ void RegisterPoliciesForNonAssociatedInterfaces(
   // policy for interfaces registered by WebUI.
   policy_map.SetNonAssociatedPolicy<::mojom::BluetoothInternalsHandler>(
       content::MojoBinderNonAssociatedPolicy::kUnexpected);
+
+  // The ad blocker. The renderer asks it synchronously, at the start of every
+  // document, what to hide; deferred, the prerendered page would wait in that
+  // call and never be activated. The answers depend only on the page's
+  // address, and the calls that change state are ignored while the page is
+  // prerendered (CosmeticFiltersImpl).
+  policy_map.SetNonAssociatedPolicy<reba_adblock::mojom::CosmeticFilters>(
+      content::MojoBinderNonAssociatedPolicy::kGrant);
 }
 
 // Registers policies for channel-associated interfaces registered in

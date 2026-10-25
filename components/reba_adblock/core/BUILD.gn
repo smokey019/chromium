@@ -1,0 +1,39 @@
+# Copyright 2026 The REBA Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+static_library("core") {
+  sources = [
+    "blocked_request_log.cc",
+    "blocked_request_log.h",
+    "engine_set.cc",
+    "engine_set.h",
+    "filter_list_catalog.cc",
+    "filter_list_catalog.h",
+    "filter_list_catalog_data.inc",
+    "user_filters.cc",
+    "user_filters.h",
+  ]
+  public_deps = [
+    "//base",
+    "//components/reba_adblock/engine",
+    "//url",
+  ]
+}
+
+source_set("unit_tests") {
+  testonly = true
+  sources = [
+    "blocked_request_log_unittest.cc",
+    "engine_set_unittest.cc",
+    "filter_list_catalog_unittest.cc",
+    "user_filters_unittest.cc",
+  ]
+  deps = [
+    ":core",
+    "//base",
+    "//testing/gmock",
+    "//testing/gtest",
+    "//url",
+  ]
+}

@@ -206,6 +206,11 @@ inline constexpr char kChromeUIInternalsHost[] = "internals";
 inline constexpr char kChromeUIInterstitialHost[] = "interstitials";
 inline constexpr char kChromeUIInterstitialURL[] = "chrome://interstitials/";
 inline constexpr char kChromeUIIwaDevHost[] = "iwa-dev";
+inline constexpr char kChromeUIRebaAdblockPopupHost[] = "reba-adblock-popup";
+inline constexpr char kChromeUIRebaAdblockPopupURL[] =
+    "chrome://reba-adblock-popup/";
+inline constexpr char kChromeUIRebaBlockedHost[] = "reba-blocked";
+inline constexpr char kChromeUIRebaBlockedURL[] = "chrome://reba-blocked/";
 inline constexpr char kChromeUILensOverlayHost[] = "lens-overlay";
 inline constexpr char kChromeUILensOverlayUntrustedURL[] =
     "chrome-untrusted://lens-overlay/";

@@ -49,6 +49,7 @@ cargo_crate("lib") {
 
   features = [
     "alloc",
+    "rc",
     "result",
     "std",
   ]
