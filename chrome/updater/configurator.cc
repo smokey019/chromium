@@ -61,10 +61,10 @@ namespace updater {
 
 namespace {
 
-// LEET: the LEET update server's CUP key, an ML-DSA-44 SubjectPublicKeyInfo.
+// REBA: the REBA update server's CUP key, an ML-DSA-44 SubjectPublicKeyInfo.
 // The private key is kept outside the source tree.
-constexpr int kLeetCupKeyVersion = 1;
-constexpr auto kLeetCupPublicKey = std::to_array<uint8_t>({
+constexpr int kRebaCupKeyVersion = 1;
+constexpr auto kRebaCupPublicKey = std::to_array<uint8_t>({
     0x30, 0x82, 0x05, 0x32, 0x30, 0x0b, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01,
     0x65, 0x03, 0x04, 0x03, 0x11, 0x03, 0x82, 0x05, 0x21, 0x00, 0x7e, 0x43,
     0x7c, 0x0a, 0x73, 0x7a, 0x48, 0x99, 0x56, 0x70, 0x3c, 0x40, 0xee, 0xa1,
@@ -359,8 +359,8 @@ bool Configurator::EnabledCupSigning() const {
 }
 
 std::optional<update_client::CupKey> Configurator::GetCupKey() const {
-  return update_client::CupKey{.version = kLeetCupKeyVersion,
-                               .spki = kLeetCupPublicKey};
+  return update_client::CupKey{.version = kRebaCupKeyVersion,
+                               .spki = kRebaCupPublicKey};
 }
 
 PrefService* Configurator::GetPrefService() const {

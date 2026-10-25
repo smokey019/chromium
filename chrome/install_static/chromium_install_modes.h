@@ -21,7 +21,7 @@ inline constexpr wchar_t kCompanyPathName[] = L"";
 
 // The brand-specific product name to be included as a component of the install
 // and user data directory paths.
-inline constexpr wchar_t kProductPathName[] = L"LEET Browser";
+inline constexpr wchar_t kProductPathName[] = L"REBA Browser";
 
 // The brand-specific safe browsing client name.
 inline constexpr char kSafeBrowsingName[] = "chromium";
@@ -43,17 +43,17 @@ inline constexpr auto kInstallModes = std::to_array<InstallConstants>({
         .install_suffix =
             L"",  // Empty install_suffix for the primary install mode.
         .logo_suffix = L"",  // No logo suffix for the primary install mode.
-        // LEET: must match browser_appid in chrome/updater/branding.gni.
+        // REBA: must match browser_appid in chrome/updater/branding.gni.
         .app_guid = L"{FFF3E393-9DAE-4711-958F-8F1B32972F9B}",
-        .base_app_name = L"LEET Browser",      // A distinct base_app_name.
-        .base_app_id = L"LEETBrowser",         // A distinct base_app_id.
-        .browser_prog_id_prefix = L"LEETHTM",  // Browser ProgID prefix.
+        .base_app_name = L"REBA Browser",      // A distinct base_app_name.
+        .base_app_id = L"REBABrowser",         // A distinct base_app_id.
+        .browser_prog_id_prefix = L"REBAHTM",  // Browser ProgID prefix.
         .browser_prog_id_description =
-            L"LEET HTML Document",  // Browser ProgID description.
-        .direct_launch_url_scheme = "leetbrowser",
-        .pdf_prog_id_prefix = L"LEETPDF",  // PDF ProgID prefix.
+            L"REBA HTML Document",  // Browser ProgID description.
+        .direct_launch_url_scheme = "rebabrowser",
+        .pdf_prog_id_prefix = L"REBAPDF",  // PDF ProgID prefix.
         .pdf_prog_id_description =
-            L"LEET PDF Document",  // PDF ProgID description.
+            L"REBA PDF Document",  // PDF ProgID description.
         .active_setup_guid =
             L"{C424A6A8-3C7C-4600-8427-64C74CA034FC}",  // Active Setup
                                                         // GUID.
