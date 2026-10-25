@@ -1,0 +1,12 @@
+Name: rand
+URL: https://crates.io/crates/rand
+Version: 0.8.8
+Revision: 572d3b0c176085c485b8fa7818a04b769097bd72
+Update Mechanism: Manual (https://crbug.com/449898466)
+License: Apache-2.0
+License File: //third_party/rust/chromium_crates_io/vendor/rand-v0_8/LICENSE-APACHE
+Shipped: yes
+Security Critical: yes
+
+Description: Random number generators and other randomness functionality.
+

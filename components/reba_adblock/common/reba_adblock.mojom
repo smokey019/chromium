@@ -1,0 +1,67 @@
+// Copyright 2026 The REBA Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+module reba_adblock.mojom;
+
+import "url/mojom/url.mojom";
+
+// What the ad blocker wants done to a page that is loading.
+struct CosmeticResources {
+  // False when the page is left alone: the ad blocker is off, the site is
+  // trusted or the page isn't a web page.
+  bool enabled;
+  // CSS selectors of elements to hide.
+  array<string> hide_selectors;
+  // JSON descriptions of filters that need the procedural filter interpreter
+  // (`:has-text()`, `:upward()`, `:style()`, `:remove()`, ...).
+  array<string> procedural_actions;
+  // Class and id selectors that generic hide rules must not hide.
+  array<string> generic_exceptions;
+  // JavaScript to run in the page before its own scripts.
+  string injected_script;
+  // Don't ask for generic hide rules (by class and id) on this page.
+  bool generichide;
+  // Refuse pop-ups that clicks on this page open without being on a link or
+  // control for them. Independent of `enabled`: it applies even when cosmetic
+  // filtering is off.
+  bool popup_guard;
+};
+
+// Used by the renderer of a frame to apply cosmetic filters. Implemented in
+// the browser, which holds the compiled filters.
+interface CosmeticFilters {
+  // Asks what to do to the document of this frame, which is at `url`. The
+  // browser may not have heard yet that the frame navigated, so the renderer
+  // says where it is. Synchronous because it has to be answered before the
+  // page's scripts run.
+  [Sync] GetCosmeticResources(url.mojom.Url url) =>
+      (CosmeticResources resources);
+
+  // Asks which generic hide rules apply to elements with these classes and
+  // ids.
+  HiddenClassIdSelectors(array<string> classes,
+                         array<string> ids,
+                         array<string> exceptions) =>
+      (array<string> selectors);
+
+  // The page hid or removed elements.
+  ReportHiddenElements(uint32 count);
+
+  // The pop-up guard refused a window that the page tried to open at `url`
+  // (a blank window, an invalid address or a non-web scheme come as
+  // about:blank).
+  ReportBlockedPopup(url.mojom.Url url);
+
+  // From the element picker: add `host##selector` to My filters, `host` being
+  // that of this frame. Only allowed while the picker is running.
+  AddCosmeticFilter(string selector);
+};
+
+// Implemented in the renderer of a frame; used by the browser to start the
+// element picker.
+interface PickerAgent {
+  // Lets the user pick an element of the page to hide. With `zapper`, the
+  // element is removed on the spot and nothing is saved.
+  StartPicker(bool zapper);
+};

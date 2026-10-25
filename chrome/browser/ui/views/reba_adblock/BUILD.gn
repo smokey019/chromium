@@ -1,0 +1,29 @@
+# Copyright 2026 The REBA Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The ad blocker's toolbar button and its pop-up.
+source_set("reba_adblock") {
+  sources = [
+    "reba_adblock_bubble.cc",
+    "reba_adblock_bubble.h",
+    "reba_adblock_toolbar_button.cc",
+    "reba_adblock_toolbar_button.h",
+  ]
+  public_deps = [
+    "//base",
+    "//chrome/browser/reba_adblock",
+    "//chrome/browser/ui/views/toolbar:toolbar_button",
+    "//ui/views",
+  ]
+  deps = [
+    "//chrome/app/vector_icons",
+    "//chrome/browser/profiles:profile",
+    "//chrome/browser/ui/webui/reba_adblock",
+    "//chrome/common",
+    "//components/tabs:public",
+    "//content/public/browser",
+    "//ui/base",
+    "//ui/views/controls/webview",
+  ]
+}

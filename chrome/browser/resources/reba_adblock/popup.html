@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="color-scheme" content="light dark">
+  <title>Ad blocker</title>
+  <link rel="stylesheet" href="popup.css">
+  <script type="module" src="popup.js"></script>
+</head>
+<body>
+  <header>
+    <svg class="logo" viewBox="0 0 24 24" aria-hidden="true">
+      <path d="M12 1 3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
+    </svg>
+    <span class="name">Ad blocker</span>
+    <span class="spacer"></span>
+    <button id="settings" class="link" title="Open the dashboard">Dashboard</button>
+  </header>
+
+  <section class="site">
+    <button id="power" class="power" aria-pressed="true"
+        title="Turn the ad blocker off or on for this site">
+      <svg viewBox="0 0 24 24" aria-hidden="true">
+        <path d="M13 3h-2v10h2V3zm4.83 2.17-1.42 1.42A6.92 6.92 0 0 1 19 12c0 3.87-3.13 7-7 7s-7-3.13-7-7c0-2.28 1.09-4.3 2.76-5.58L6.34 5.17A8.96 8.96 0 0 0 3 12c0 4.97 4.03 9 9 9s9-4.03 9-9c0-2.74-1.23-5.19-3.17-6.83z"/>
+      </svg>
+    </button>
+    <div class="host" id="host"></div>
+    <div class="status" id="status"></div>
+  </section>
+
+  <section class="stats">
+    <div><span class="number" id="pageCount">0</span><span class="caption">blocked on this page</span></div>
+    <div><span class="number" id="hiddenCount">0</span><span class="caption">elements hidden</span></div>
+    <div><span class="number" id="totalCount">0</span><span class="caption">blocked in total</span></div>
+  </section>
+
+  <section class="tools" id="tools">
+    <button id="pick">Block an element</button>
+    <button id="zap">Zap an element</button>
+    <button id="reload">Reload page</button>
+    <button id="log">Blocked requests</button>
+  </section>
+
+  <section class="items" id="itemsSection" hidden>
+    <h2>Blocked on this page</h2>
+    <ul id="items"></ul>
+  </section>
+
+  <section class="footer">
+    <label class="global">
+      <input type="checkbox" id="globalEnabled">
+      <span>Ad blocker on</span>
+    </label>
+  </section>
+</body>
+</html>
