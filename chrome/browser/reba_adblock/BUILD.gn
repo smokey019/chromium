@@ -1,0 +1,53 @@
+# Copyright 2026 The REBA Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The browser side of the built-in ad blocker.
+static_library("reba_adblock") {
+  sources = [
+    "adblock_url_loader_factory.cc",
+    "adblock_url_loader_factory.h",
+    "cosmetic_filters_impl.cc",
+    "cosmetic_filters_impl.h",
+    "engine_builder.cc",
+    "engine_builder.h",
+    "filter_list_manager.cc",
+    "filter_list_manager.h",
+    "reba_adblock_main_parts.cc",
+    "reba_adblock_main_parts.h",
+    "reba_adblock_navigation_throttle.cc",
+    "reba_adblock_navigation_throttle.h",
+    "reba_adblock_popup.cc",
+    "reba_adblock_popup.h",
+    "reba_adblock_prefs.cc",
+    "reba_adblock_prefs.h",
+    "reba_adblock_service.cc",
+    "reba_adblock_service.h",
+    "reba_adblock_tab_helper.cc",
+    "reba_adblock_tab_helper.h",
+    "reba_adblock_url_loader_throttle.cc",
+    "reba_adblock_url_loader_throttle.h",
+    "reba_adblock_websocket.cc",
+    "reba_adblock_websocket.h",
+    "resources_manager.cc",
+    "resources_manager.h",
+  ]
+  public_deps = [
+    "//base",
+    "//components/reba_adblock/common:mojom",
+    "//components/reba_adblock/core",
+    "//content/public/browser",
+    "//services/network/public/cpp",
+    "//url",
+  ]
+  deps = [
+    "//chrome/common",
+    "//components/blocked_content",
+    "//components/prefs",
+    "//crypto",
+    "//third_party/blink/public/common",
+    "//mojo/public/cpp/bindings",
+    "//net",
+    "//services/network/public/mojom",
+  ]
+}

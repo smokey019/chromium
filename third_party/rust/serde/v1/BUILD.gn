@@ -60,6 +60,7 @@ cargo_crate("lib") {
     "alloc",
     "default",
     "derive",
+    "rc",
     "serde_derive",
     "std",
   ]

@@ -36,6 +36,8 @@
 #include "chrome/browser/ui/webui/history_clusters/history_clusters_internals_ui_config.h"
 #include "chrome/browser/ui/webui/internal_debug_pages_disabled/internal_debug_pages_disabled_ui.h"
 #include "chrome/browser/ui/webui/interstitials/interstitial_ui.h"
+#include "chrome/browser/ui/webui/reba_adblock/adblock_blocked_page_ui.h"
+#include "chrome/browser/ui/webui/reba_adblock/adblock_popup_ui.h"
 #include "chrome/browser/ui/webui/local_state/local_state_ui.h"
 #include "chrome/browser/ui/webui/location_internals/location_internals_ui.h"
 #include "chrome/browser/ui/webui/management/management_ui.h"
@@ -359,6 +361,9 @@ void RegisterChromeWebUIConfigs() {
 #else  // BUILDFLAG(IS_ANDROID)
 #if !BUILDFLAG(IS_CHROMEOS)
   map.AddWebUIConfig(std::make_unique<AppHomeUIConfig>());
+  map.AddWebUIConfig(
+      std::make_unique<reba_adblock::AdblockBlockedPageUIConfig>());
+  map.AddWebUIConfig(std::make_unique<reba_adblock::AdblockPopupUIConfig>());
 #endif  // !BUILDFLAG(IS_CHROMEOS)
 #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
   map.AddWebUIConfig(std::make_unique<media_router::CastFeedbackUIConfig>());

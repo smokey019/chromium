@@ -22,6 +22,9 @@ enum ChromeIsolatedWorldIDs {
   // Isolated world ID for Autofill custom form control scripts.
   ISOLATED_WORLD_ID_AUTOFILL_CUSTOM_FORM_CONTROLS,
 
+  // Isolated world ID for the scripts of the REBA ad blocker.
+  ISOLATED_WORLD_ID_REBA_ADBLOCK,
+
 #if BUILDFLAG(IS_MAC)
   // Isolated world ID for AppleScript.
   ISOLATED_WORLD_ID_APPLESCRIPT,

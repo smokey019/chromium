@@ -53,6 +53,14 @@ smallvec = "1"
 static_assertions = "1"
 xml = "1.4.0"
 
+# REBA: network and cosmetic filtering engine for the built-in ad blocker. The
+# domain resolver is supplied by //components/reba_adblock (net's registry
+# controlled domains), so the `addr` PSL crate isn't pulled in.
+[dependencies.adblock]
+version = "0.13.3"
+default-features = false
+features = ["css-validation", "full-regex-handling"]
+
 [dependencies.bytemuck]
 version = "1"
 features = ["nightly_portable_simd"]  # For std::simd coverage.

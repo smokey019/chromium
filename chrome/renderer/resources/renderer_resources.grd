@@ -13,6 +13,9 @@
       <include name="IDR_BLOCKED_PLUGIN_HTML" file="plugins/blocked_plugin.html" flattenhtml="true" type="BINDATA" />
       <include name="IDR_DISABLED_PLUGIN_HTML" file="plugins/disabled_plugin.html" flattenhtml="true" type="BINDATA" />
       <include name="IDR_PDF_PLUGIN_HTML" file="plugins/pdf_plugin.html" flattenhtml="true" type="BINDATA" />
+      <include name="IDR_REBA_ADBLOCK_COSMETIC_JS" file="reba_adblock/cosmetic_filters.js" type="BINDATA" />
+      <include name="IDR_REBA_ADBLOCK_PICKER_JS" file="reba_adblock/picker.js" type="BINDATA" />
+      <include name="IDR_REBA_ADBLOCK_POPUP_GUARD_JS" file="reba_adblock/popup_guard.js" type="BINDATA" />
     </includes>
   </release>
 </grit>

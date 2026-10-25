@@ -1,0 +1,31 @@
+// Copyright 2026 The REBA Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// An outlined shield crossed out, for the toolbar button when the ad blocker is
+// off or paused on the site.
+CANVAS_DIMENSIONS, 24,
+FILL_RULE_NONZERO,
+MOVE_TO, 12, 1,
+LINE_TO, 3, 5,
+LINE_TO, 3, 11,
+CUBIC_TO, 3, 16.55f, 6.84f, 21.74f, 12, 23,
+CUBIC_TO, 17.16f, 21.74f, 21, 16.55f, 21, 11,
+LINE_TO, 21, 5,
+CLOSE,
+// The inside, in the opposite direction, so it is a hole.
+NEW_PATH,
+MOVE_TO, 12, 3.2f,
+LINE_TO, 19, 6.3f,
+LINE_TO, 19, 11,
+CUBIC_TO, 19, 15.4f, 16.05f, 19.4f, 12, 20.6f,
+CUBIC_TO, 7.95f, 19.4f, 5, 15.4f, 5, 11,
+LINE_TO, 5, 6.3f,
+CLOSE,
+// The slash.
+NEW_PATH,
+MOVE_TO, 2.6f, 4,
+LINE_TO, 4, 2.6f,
+LINE_TO, 21.4f, 20,
+LINE_TO, 20, 21.4f,
+CLOSE
