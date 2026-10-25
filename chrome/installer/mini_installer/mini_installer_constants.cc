@@ -66,13 +66,13 @@ const wchar_t kClientStateKeyBase[] = L"Software\\Chrome for Testing";
 // The path to the key in which kCleanupRegistryValue is found.
 const wchar_t kCleanupRegistryKey[] = L"Software\\Chrome for Testing";
 #else
-// LEET: the LEET updater's registry root (see
+// REBA: the REBA updater's registry root (see
 // chrome/install_static/install_modes.cc). The trailing slash is required.
-const wchar_t kClientsKeyBase[] = L"Software\\LEET\\Update\\Clients\\";
+const wchar_t kClientsKeyBase[] = L"Software\\REBA\\Update\\Clients\\";
 // The trailing slash is required.
-const wchar_t kClientStateKeyBase[] = L"Software\\LEET\\Update\\ClientState\\";
+const wchar_t kClientStateKeyBase[] = L"Software\\REBA\\Update\\ClientState\\";
 // The path to the key in which kCleanupRegistryValue is found.
-const wchar_t kCleanupRegistryKey[] = L"Software\\LEET Browser";
+const wchar_t kCleanupRegistryKey[] = L"Software\\REBA Browser";
 #endif
 
 }  // namespace mini_installer
