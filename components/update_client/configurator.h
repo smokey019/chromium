@@ -124,7 +124,7 @@ class Configurator : public base::RefCountedThreadSafe<Configurator> {
   virtual bool EnabledCupSigning() const = 0;
 
   // Returns the CUP key used to verify signed update check responses, or
-  // nullopt to use the built-in key. LEET: lets the LEET updater verify
+  // nullopt to use the built-in key. REBA: lets the REBA updater verify
   // responses from its own server without changing the component updater's
   // key.
   virtual std::optional<CupKey> GetCupKey() const;

@@ -58,7 +58,7 @@ class DefaultExternalConstants : public ExternalConstants {
   }
 
   crx_file::VerifierFormat CrxVerifierFormat() const override {
-    // LEET: Google's publisher proof can't be produced for LEET payloads; the
+    // REBA: Google's publisher proof can't be produced for REBA payloads; the
     // payload signing key is pinned by CRX_PKHASH instead.
     return crx_file::VerifierFormat::CRX3;
   }

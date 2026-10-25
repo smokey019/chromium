@@ -391,7 +391,7 @@ void PrimaryAccountManager::RegisterProfilePrefs(PrefRegistrySimple* registry) {
       prefs::kGoogleServicesSyncingUsernameMigratedToSignedIn, std::string());
   registry->RegisterIntegerPref(prefs::kGoogleServicesSyncingUserMigrationType,
                                 /*SyncToSigninMigrationType::kUnknown=*/0);
-  // LEET: browser sign-in is off by default. Google restricts the OAuth token
+  // REBA: browser sign-in is off by default. Google restricts the OAuth token
   // that it needs for self-built Chromium (docs/api_keys.md), so the flow can
   // never complete. The BrowserSignin policy or the settings toggle can still
   // turn it back on.

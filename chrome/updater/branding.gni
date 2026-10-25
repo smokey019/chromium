@@ -7,13 +7,13 @@ import("//build/config/chrome_build.gni")
 if (is_chrome_branded) {
   import("//chrome/updater/internal/branding_google.gni")
 } else {
-  # LEET: the Windows values below are LEET's own. Every GUID in this branch
-  # was regenerated so the LEET updater can't collide with another updater.
-  browser_name = "LEET Browser"
-  browser_product_name = "LEET Browser"
-  crash_product_name = "LEETUpdater"
+  # REBA: the Windows values below are REBA's own. Every GUID in this branch
+  # was regenerated so the REBA updater can't collide with another updater.
+  browser_name = "REBA Browser"
+  browser_product_name = "REBA Browser"
+  crash_product_name = "REBAUpdater"
   crash_upload_url = ""
-  help_center_url = "https://leet.smokey.gg/help"
+  help_center_url = "https://reba.smokey.gg/help"
   app_logo_url = ""
   keystone_app_name = "ChromiumSoftwareUpdate"
   keystone_bundle_identifier = "org.chromium.Keystone"
@@ -22,16 +22,15 @@ if (is_chrome_branded) {
   privileged_helper_bundle_name = "ChromiumUpdaterPrivilegedHelper"
   privileged_helper_name = "org.chromium.Chromium.UpdaterPrivilegedHelper"
   updater_app_icon_path = "//chrome/app/theme/chromium/mac/app.icns"
-  updater_company_full_name = "LEET"
-  updater_company_short_name = "LEET"
-  updater_company_short_name_lowercase = "leet"
-  updater_company_short_name_uppercase = "LEET"
-  updater_copyright =
-      "Copyright 2020 The Chromium Authors. All rights reserved."
-  updater_product_full_name = "LEETUpdater"
-  updater_product_full_name_dashed_lowercase = "leet-updater"
-  updater_product_full_display_name = "LEET Updater"
-  updater_metainstaller_name = "LEET Browser Installer"
+  updater_company_full_name = "REBA"
+  updater_company_short_name = "REBA"
+  updater_company_short_name_lowercase = "reba"
+  updater_company_short_name_uppercase = "REBA"
+  updater_copyright = "Copyright 2026 REBA. All rights reserved."
+  updater_product_full_name = "REBAUpdater"
+  updater_product_full_name_dashed_lowercase = "reba-updater"
+  updater_product_full_display_name = "REBA Updater"
+  updater_metainstaller_name = "REBA Browser Installer"
   mac_team_identifier = "PLACEHOLDER"
   updater_appid = "{eb08e6aa-aa31-4df5-b8ec-f090ea9264cd}"
 
@@ -40,14 +39,14 @@ if (is_chrome_branded) {
   qualification_appid = "{409d39dc-2216-469a-a9a9-648a090d6bcb}"
   platform_experience_helper_appid = "{22d8b487-b57a-447f-a2b6-2475ef71e4f1}"
 
-  # base64(SHA-256(SPKI DER)) of the LEET payload signing key.
+  # base64(SHA-256(SPKI DER)) of the REBA payload signing key.
   crx_pkhash = "qeORX6ORFrqsIduOMIfX0R+Wnvj39Obsb+gC9zoaDJ8="
-  legacy_service_name_prefix = "leetupdate"
+  legacy_service_name_prefix = "rebaupdate"
   prefs_access_mutex = "{51276B3F-D144-4B4E-B11D-357F986DBE56}"
   setup_mutex_prefix = "{92312B35-A8E6-4BB8-8B45-6B01F8D488CE}"
   grdfile_name = "chromium_strings"
   extra_args_is_chrome_branded = "IS_CHROME_BRANDED=False"
-  update_check_url = "https://leet.smokey.gg/service/update2/json"
+  update_check_url = "https://reba.smokey.gg/service/update2/json"
   updater_event_logging_url = ""
 
   UpdaterLegacyLibGUID = "9DDA2C79-B640-403D-9D5A-E6E48A94FE43"
