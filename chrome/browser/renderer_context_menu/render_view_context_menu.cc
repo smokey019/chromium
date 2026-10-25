@@ -99,6 +99,8 @@
 #include "chrome/browser/profiles/profile_manager.h"
 #include "chrome/browser/profiles/profile_window.h"
 #include "chrome/browser/reading_list/reading_list_model_factory.h"
+#include "chrome/browser/reba_adblock/reba_adblock_service.h"
+#include "chrome/browser/reba_adblock/reba_adblock_tab_helper.h"
 #include "chrome/browser/renderer_context_menu/accessibility_labels_menu_observer.h"
 #include "chrome/browser/renderer_context_menu/context_menu_content_type_factory.h"
 #include "chrome/browser/renderer_context_menu/dictation_menu_observer.h"
@@ -797,6 +799,12 @@ int FindUMAEnumValueForCommand(int id, UmaEnumIdLookupType type) {
 
   if (ContextMenuMatcher::IsExtensionsCustomCommandId(id)) {
     return 1;
+  }
+
+  // The ad blocker's commands are counted with the custom ones.
+  if (id == IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT ||
+      id == IDC_CONTENT_CONTEXT_REBA_TOGGLE_SITE) {
+    return 0;
   }
 
   id = CollapseCommandsForUMA(id);
@@ -1571,6 +1579,8 @@ void RenderViewContextMenu::InitMenu() {
     added_accessibility_labels_items = AppendAccessibilityLabelsItems();
   }
 
+  AppendRebaAdblockItems();
+
   if (content_type_->SupportsGroup(
           ContextMenuContentType::ITEM_GROUP_DEVELOPER)) {
     AppendDeveloperItems();
@@ -1900,6 +1910,53 @@ ChromeComposeClient* RenderViewContextMenu::GetChromeComposeClient() const {
   return ChromeComposeClient::FromWebContents(source_web_contents_);
 }
 #endif  // BUILDFLAG(ENABLE_COMPOSE)
+
+void RenderViewContextMenu::AppendRebaAdblockItems() {
+  reba_adblock::RebaAdblockService* service =
+      reba_adblock::RebaAdblockService::Get();
+  if (!service || !service->IsEnabled() || !service->ContextMenuEnabled() ||
+      !params_.page_url.SchemeIsHTTPOrHTTPS()) {
+    return;
+  }
+  // The items act through the tab's helper, so they are left out of contents
+  // that have none (side panels, guests) and of the PDF viewer, where the
+  // picker has nothing to pick.
+  if (!reba_adblock::RebaAdblockTabHelper::FromWebContents(
+          source_web_contents_) ||
+      IsFrameInPdfViewer(GetRenderFrameHost())) {
+    return;
+  }
+  // Shown wherever extensions' items are, on links, images and text fields
+  // too, like uBlock Origin's own "Block element..." (DevTools and menus
+  // with custom items have none).
+  if (!content_type_->SupportsGroup(
+          ContextMenuContentType::ITEM_GROUP_ALL_EXTENSION)) {
+    return;
+  }
+  menu_model_.AddSeparator(ui::NORMAL_SEPARATOR);
+  menu_model_.AddItem(IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT,
+                      u"Block element...");
+  menu_model_.AddItem(
+      IDC_CONTENT_CONTEXT_REBA_TOGGLE_SITE,
+      service->IsSiteTrusted(params_.page_url)
+          ? u"Turn the ad blocker on for this site"
+          : u"Turn the ad blocker off for this site");
+}
+
+void RenderViewContextMenu::ExecuteRebaAdblockCommand(int id) {
+  reba_adblock::RebaAdblockTabHelper* helper =
+      reba_adblock::RebaAdblockTabHelper::FromWebContents(source_web_contents_);
+  reba_adblock::RebaAdblockService* service =
+      reba_adblock::RebaAdblockService::Get();
+  if (!helper || !service) {
+    return;
+  }
+  if (id == IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT) {
+    helper->StartPicker(/*zapper=*/false);
+  } else {
+    helper->SetSiteTrusted(!service->IsSiteTrusted(params_.page_url));
+  }
+}
 
 void RenderViewContextMenu::AppendDeveloperItems() {
   // Do not Show Inspect Element for DevTools unless DevTools runs with the
@@ -3553,6 +3610,11 @@ bool RenderViewContextMenu::IsCommandIdEnabled(int id) const {
     return extension_items_.IsCommandIdEnabled(id);
   }
 
+  if (id == IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT ||
+      id == IDC_CONTENT_CONTEXT_REBA_TOGGLE_SITE) {
+    return true;
+  }
+
   if (id >= IDC_CONTENT_CONTEXT_PROTOCOL_HANDLER_FIRST &&
       id <= IDC_CONTENT_CONTEXT_PROTOCOL_HANDLER_LAST) {
     return true;
@@ -3940,6 +4002,12 @@ void RenderViewContextMenu::ExecuteCommand(int id, int event_flags) {
   if (id >= IDC_OPEN_LINK_IN_PROFILE_FIRST &&
       id <= IDC_OPEN_LINK_IN_PROFILE_LAST) {
     ExecOpenLinkInProfile(id - IDC_OPEN_LINK_IN_PROFILE_FIRST);
+    return;
+  }
+
+  if (id == IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT ||
+      id == IDC_CONTENT_CONTEXT_REBA_TOGGLE_SITE) {
+    ExecuteRebaAdblockCommand(id);
     return;
   }
 

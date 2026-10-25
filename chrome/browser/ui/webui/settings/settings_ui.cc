@@ -57,10 +57,12 @@
 #include "chrome/browser/ui/webui/cr_components/customize_color_scheme_mode/customize_color_scheme_mode_handler.h"
 #include "chrome/browser/ui/webui/extension_control_handler.h"
 #include "chrome/browser/ui/webui/favicon_source.h"
+#include "chrome/browser/ui/webui/reba_adblock/adblock_settings_handler.h"
 #include "chrome/browser/ui/webui/managed_ui_handler.h"
 #include "chrome/browser/ui/webui/metrics_handler.h"
 #include "chrome/browser/ui/webui/plural_string_handler.h"
 #include "chrome/browser/ui/webui/sanitized_image/sanitized_image_source.h"
+#include "chrome/browser/ui/webui/reba_adblock/adblock_settings_handler.h"
 #include "chrome/browser/ui/webui/settings/about_handler.h"
 #include "chrome/browser/ui/webui/settings/accessibility_main_handler.h"
 #include "chrome/browser/ui/webui/settings/appearance_handler.h"
@@ -296,6 +298,8 @@ SettingsUI::SettingsUI(content::WebUI* web_ui)
   AddSettingsPageUIHandler(std::make_unique<SiteSettingsHandler>(profile));
   AddSettingsPageUIHandler(std::make_unique<StartupPagesHandler>(web_ui));
   AddSettingsPageUIHandler(std::make_unique<SettingsTelemetryHandler>());
+  AddSettingsPageUIHandler(
+      std::make_unique<reba_adblock::AdblockSettingsHandler>());
   AddSettingsPageUIHandler(std::make_unique<SecurityKeysPINHandler>());
   AddSettingsPageUIHandler(std::make_unique<SecurityKeysResetHandler>());
   AddSettingsPageUIHandler(std::make_unique<SecurityKeysCredentialHandler>());

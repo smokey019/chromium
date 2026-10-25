@@ -10,6 +10,7 @@ import 'chrome://resources/cr_components/managed_footnote/managed_footnote.js';
 import 'chrome://resources/cr_elements/cr_view_manager/cr_view_manager.js';
 import 'chrome://resources/cr_elements/icons.html.js';
 import '../about_page/about_page.js';
+import '../adblock_page/adblock_page.js';
 import '../ai_page/ai_page_index.js';
 import '../appearance_page/appearance_page_index.js';
 import '../autofill_page/autofill_page_index.js';

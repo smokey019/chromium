@@ -1,0 +1,29 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: REBA <noreply@reba.smokey.gg>
+Date: Thu, 22 Oct 2026 00:00:00 +0000
+Subject: [PATCH] Don't enable nightly-only features
+
+Chromium's rustc is a nightly build, so flatbuffers' build script turns on
+`feature(trusted_len)`, which isn't in the list of features Chromium allows.
+---
+ third_party/rust/chromium_crates_io/vendor/flatbuffers-v25/build.rs | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/third_party/rust/chromium_crates_io/vendor/flatbuffers-v25/build.rs b/third_party/rust/chromium_crates_io/vendor/flatbuffers-v25/build.rs
+--- a/third_party/rust/chromium_crates_io/vendor/flatbuffers-v25/build.rs
++++ b/third_party/rust/chromium_crates_io/vendor/flatbuffers-v25/build.rs
+@@ -7,7 +7,10 @@
+     // #[cfg(nightly)]
+     // for nightly only features
+     println!("cargo:rustc-check-cfg=cfg(nightly)");
+-    if version_meta.channel == Channel::Nightly {
++    // REBA: Chromium's rustc reports the nightly channel, but only allows a
++    // fixed list of unstable features, which doesn't include `trusted_len`
++    // that this crate would turn on.
++    if false && version_meta.channel == Channel::Nightly {
+         println!("cargo:rustc-cfg=nightly")
+     }
+ }
+-- 
+2.50.0
+

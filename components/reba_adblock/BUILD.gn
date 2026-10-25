@@ -1,0 +1,26 @@
+# Copyright 2026 The REBA Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+# The built-in ad blocker. See README.md.
+
+import("//testing/test.gni")
+
+group("unit_tests") {
+  testonly = true
+  deps = [
+    "//components/reba_adblock/core:unit_tests",
+    "//components/reba_adblock/engine:unit_tests",
+  ]
+}
+
+# A small, fast-to-build test binary, so the ad blocker can be tested without
+# building all of components_unittests.
+test("reba_adblock_unittests") {
+  deps = [
+    ":unit_tests",
+    "//base/test:run_all_unittests",
+    "//testing/gmock",
+    "//testing/gtest",
+  ]
+}

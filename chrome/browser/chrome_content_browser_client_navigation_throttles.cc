@@ -34,6 +34,7 @@
 #include "chrome/browser/privacy_sandbox/privacy_sandbox_settings_factory.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/pwc/pwc_navigation_throttle.h"
+#include "chrome/browser/reba_adblock/reba_adblock_navigation_throttle.h"
 #include "chrome/browser/ssl/chrome_security_blocking_page_factory.h"
 #include "chrome/browser/ssl/https_defaulted_callbacks.h"
 #include "chrome/browser/ssl/https_upgrades_navigation_throttle.h"
@@ -310,6 +311,10 @@ void CreateAndAddChromeThrottlesForNavigation(
     CrossDeviceSigninFlowNavigationThrottle::MaybeCreateAndAdd(registry);
 #endif  // BUILDFLAG(IS_ANDROID)
   }
+
+  // The ad blocker. After MetricsNavigationThrottle, which has to see the
+  // navigations that get cancelled.
+  reba_adblock::RebaAdblockNavigationThrottle::MaybeCreateAndAdd(registry);
 
   DSEPrewarmNavigationThrottle::MaybeCreateAndAdd(registry);
   if (!features::IsDsePreload2Enabled()) {

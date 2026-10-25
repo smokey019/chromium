@@ -49,6 +49,7 @@ export interface SettingsRoutes {
   PAYMENTS: Route;
   PEOPLE: Route;
   PERFORMANCE: Route;
+  ADBLOCK: Route;
   PRELOADING: Route;
   PRIVACY: Route;
   PRIVACY_GUIDE: Route;

@@ -308,6 +308,11 @@ function createRoutes(): SettingsRoutes {
         loadTimeData.getString('performancePageTitle'));
   }
 
+  // The built-in ad blocker.
+  if (visibility.adblock !== false) {
+    r.ADBLOCK = r.BASIC.createSection('/adblock', 'adblock', 'Ad blocker');
+  }
+
   return r as unknown as SettingsRoutes;
 }
 

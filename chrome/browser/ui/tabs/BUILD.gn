@@ -502,6 +502,7 @@ if (!is_android) {
   source_set("impl") {
     public_deps = [
       ":page_context_eligibility_helper",
+      "//chrome/browser/reba_adblock",
       "//chrome/browser/loader",
     ]
 

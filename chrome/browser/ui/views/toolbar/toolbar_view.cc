@@ -89,6 +89,7 @@
 #include "chrome/browser/ui/views/intent_picker_bubble_view.h"
 #include "chrome/browser/ui/views/location_bar/webui_location_bar.h"
 #include "chrome/browser/ui/views/page_action/page_action_container_view.h"
+#include "chrome/browser/ui/views/reba_adblock/reba_adblock_toolbar_button.h"
 #include "chrome/browser/ui/views/page_action/page_action_view.h"
 #include "chrome/browser/ui/views/page_action/page_action_view_interface.h"
 #include "chrome/browser/ui/views/performance_controls/battery_saver_button.h"
@@ -543,6 +544,10 @@ void ToolbarView::Init() {
                        should_show_chrome_labs_ui);
     }
   }
+
+  // The ad blocker's shield.
+  reba_adblock_button_ = AddChildView(
+      std::make_unique<reba_adblock::RebaAdblockToolbarButton>(browser_));
 
   // Only show the Battery Saver button when it is not controlled by the OS. On
   // ChromeOS the battery icon in the shelf shows the same information.

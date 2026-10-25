@@ -141,6 +141,10 @@ namespace captions {
 class CaptionBubble;
 }
 
+namespace reba_adblock {
+class RebaAdblockBubble;
+}
+
 namespace chromeos {
 class MultitaskMenu;
 }
@@ -910,6 +914,7 @@ class VIEWS_EXPORT BubbleDialogDelegateView : public View,
   friend class ::FlyingIndicator;
   friend class ::GlobalErrorBubbleView;
   friend class ::HomePageUndoBubble;
+  friend class reba_adblock::RebaAdblockBubble;
   friend class ::IOSPromoBubbleView;
   friend class ::MediaDialogView;
   friend class ::HatsNextWebDialog;

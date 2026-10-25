@@ -197,6 +197,8 @@ aggregate_vector_icons("chrome_vector_icons") {
     "keyboard_double_arrow_right.icon",
     "laptop_old.icon",
     "laptop_windows.icon",
+    "reba_adblock_shield.icon",
+    "reba_adblock_shield_off.icon",
     "leading_scroll_old.icon",
     "left_panel_close_flippable.icon",
     "left_panel_close_old.icon",

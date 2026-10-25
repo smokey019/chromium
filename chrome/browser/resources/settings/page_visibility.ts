@@ -9,6 +9,7 @@ import {loadTimeData} from './i18n_setup.js';
  */
 export interface PageVisibility {
   a11y?: boolean;
+  adblock?: boolean;
   ai?: boolean;
   appearance?: boolean|AppearancePageVisibility;
   autofill?: boolean;
@@ -50,6 +51,7 @@ function createPageVisibility(): PageVisibility|undefined {
   // <if expr="not is_chromeos">
   const pageVisibility = {
     a11y: false,
+    adblock: false,
     ai: false,
     appearance: false,
     autofill: false,

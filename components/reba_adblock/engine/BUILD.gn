@@ -1,0 +1,62 @@
+# Copyright 2026 The REBA Authors
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//build/rust/rust_static_library.gni")
+
+# The filtering engine: Brave's adblock-rust, compiled in through a cxx bridge.
+rust_static_library("engine_rust") {
+  crate_root = "engine.rs"
+  sources = [ "engine.rs" ]
+  cxx_bindings = [ "engine.rs" ]
+
+  # Required by the cxx bridge.
+  allow_unsafe = true
+
+  deps = [
+    ":domain_resolver",
+    "//third_party/rust/adblock/v0_13:lib",
+    "//third_party/rust/serde_json/v1:lib",
+  ]
+}
+
+# Called back by the Rust engine to find the registrable domain of a host.
+source_set("domain_resolver") {
+  sources = [
+    "domain_resolver.cc",
+    "domain_resolver.h",
+  ]
+  deps = [
+    "//base",
+    "//net",
+    "//third_party/rust/cxx/v1:lib",
+  ]
+}
+
+static_library("engine") {
+  sources = [
+    "adblock_engine.cc",
+    "adblock_engine.h",
+  ]
+  public_deps = [
+    "//base",
+    "//third_party/rust/cxx/v1:lib",
+    "//url",
+  ]
+  deps = [
+    ":domain_resolver",
+    ":engine_rust",
+  ]
+}
+
+source_set("unit_tests") {
+  testonly = true
+  sources = [ "adblock_engine_unittest.cc" ]
+  deps = [
+    ":engine",
+    "//base",
+    "//testing/gmock",
+    "//testing/gtest",
+    "//url",
+  ]
+}

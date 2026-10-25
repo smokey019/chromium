@@ -188,6 +188,7 @@ source_set("impl") {
   ]
 
   deps = [
+    "//chrome/browser/ui/webui/reba_adblock",
     ":settings",
     "//chrome/app:command_ids",
     "//chrome/app:generated_resources",

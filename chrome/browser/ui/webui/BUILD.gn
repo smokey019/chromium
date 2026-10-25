@@ -41,6 +41,7 @@ source_set("configs") {
   ]
 
   deps = [
+    "//chrome/browser/ui/webui/reba_adblock",
     ":gcm_internals_ui",
     ":net_export_ui",
     ":ntp_tiles_internals_ui",

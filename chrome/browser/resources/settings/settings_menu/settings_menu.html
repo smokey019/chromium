@@ -37,6 +37,13 @@
           <span class="menu-label">$i18n{performancePageTitle}</span>
           <cr-ripple></cr-ripple>
         </a>
+        <a role="menuitem" id="adblock" href="/adblock"
+            class="cr-nav-menu-item"
+            ?hidden="${this.shouldHideMenuItem_(this.pageVisibility_?.adblock)}">
+          <cr-icon icon="settings:block"></cr-icon>
+          <span class="menu-label">Ad blocker</span>
+          <cr-ripple></cr-ripple>
+        </a>
         <a role="menuitem" id="ai" href="/ai"
             ?hidden="${!this.showAiPageMenuItem_()}"
             class="cr-nav-menu-item">

@@ -1,0 +1,23 @@
+// Copyright 2026 The REBA Authors
+// Use of this source code is governed by a BSD-style license that can be
+// found in the LICENSE file.
+
+// A filled shield, for the toolbar button when the ad blocker is on.
+CANVAS_DIMENSIONS, 24,
+FILL_RULE_NONZERO,
+MOVE_TO, 12, 1,
+LINE_TO, 3, 5,
+LINE_TO, 3, 11,
+CUBIC_TO, 3, 16.55f, 6.84f, 21.74f, 12, 23,
+CUBIC_TO, 17.16f, 21.74f, 21, 16.55f, 21, 11,
+LINE_TO, 21, 5,
+CLOSE,
+// A check mark cut out of the shield.
+NEW_PATH,
+MOVE_TO, 10.4f, 16.2f,
+LINE_TO, 6.6f, 12.4f,
+LINE_TO, 7.9f, 11.1f,
+LINE_TO, 10.4f, 13.6f,
+LINE_TO, 16.1f, 7.9f,
+LINE_TO, 17.4f, 9.2f,
+CLOSE

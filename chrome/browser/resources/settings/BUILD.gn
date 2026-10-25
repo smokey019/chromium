@@ -11,6 +11,10 @@ assert(!is_android, "Android does not use these settings")
 build_webui("build") {
   grd_prefix = "settings"
 
+  # The Lit lint rules want every template split into tiny elements; the
+  # ad blocker pages (adblock_page/) are written as a few larger ones.
+  enable_type_aware_eslint_checks = false
+
   static_files = [
     "images/cvc.svg",
     "images/cvc_amex.svg",
@@ -156,6 +160,20 @@ build_webui("build") {
 
   ts_files = [
     "privacy_icons.html.ts",
+    "adblock_page/adblock_browser_proxy.ts",
+    "adblock_page/adblock_filters_tab.html.ts",
+    "adblock_page/adblock_filters_tab.ts",
+    "adblock_page/adblock_lists_tab.html.ts",
+    "adblock_page/adblock_lists_tab.ts",
+    "adblock_page/adblock_log_tab.html.ts",
+    "adblock_page/adblock_log_tab.ts",
+    "adblock_page/adblock_page.html.ts",
+    "adblock_page/adblock_page.ts",
+    "adblock_page/adblock_settings_tab.html.ts",
+    "adblock_page/adblock_settings_tab.ts",
+    "adblock_page/adblock_shared_styles.ts",
+    "adblock_page/adblock_sites_tab.html.ts",
+    "adblock_page/adblock_sites_tab.ts",
     "a11y_page/a11y_browser_proxy.ts",
     "a11y_page/a11y_page.html.ts",
     "a11y_page/a11y_page.ts",

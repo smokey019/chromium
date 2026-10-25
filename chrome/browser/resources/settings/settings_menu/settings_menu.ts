@@ -44,6 +44,7 @@ const pathToActionMap: Map<string, string> = new Map([
   ['/autofill', 'SettingsMenu_AutofillClicked'],
   ['/privacy', 'SettingsMenu_PrivacyClicked'],
   ['/performance', 'SettingsMenu_PerformanceClicked'],
+  ['/adblock', 'SettingsMenu_AdblockClicked'],
   ['/ai', 'SettingsMenu_AiPageEntryPointClicked'],
   ['/appearance', 'SettingsMenu_AppearanceClicked'],
   ['/search', 'SettingsMenu_SearchClicked'],

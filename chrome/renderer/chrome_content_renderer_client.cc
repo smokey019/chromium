@@ -56,6 +56,7 @@
 #include "chrome/renderer/browser_exposed_renderer_interfaces.h"
 #include "chrome/renderer/chrome_content_settings_agent_delegate.h"
 #include "chrome/renderer/chrome_render_frame_observer.h"
+#include "chrome/renderer/reba_adblock/cosmetic_observer.h"
 #include "chrome/renderer/chrome_render_thread_observer.h"
 #include "chrome/renderer/controlled_frame/controlled_frame_extensions_renderer_api_provider.h"
 #include "chrome/renderer/google_accounts_private_api_extension.h"
@@ -657,6 +658,9 @@ void ChromeContentRendererClient::RenderFrameCreated(
   service_manager::BinderRegistry* registry = render_frame_observer->registry();
 
   new prerender::NoStatePrefetchRenderFrameObserver(render_frame);
+
+  // The ad blocker's cosmetic filters.
+  new reba_adblock::CosmeticObserver(render_frame);
 
   auto content_settings_delegate =
       std::make_unique<ChromeContentSettingsAgentDelegate>(render_frame);
@@ -1489,6 +1493,12 @@ ChromeContentRendererClient::CreateSpeechRecognitionClient(
 
 void ChromeContentRendererClient::RunScriptsAtDocumentStart(
     content::RenderFrame* render_frame) {
+  if (reba_adblock::CosmeticObserver* cosmetic =
+          reba_adblock::CosmeticObserver::Get(render_frame)) {
+    if (!cosmetic->RunScriptsAtDocumentStart()) {
+      return;  // The page's scripts removed the frame; |render_frame| is gone.
+    }
+  }
 #if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
   extensions::ExtensionsRendererClient::Get()->RunScriptsAtDocumentStart(
       render_frame);

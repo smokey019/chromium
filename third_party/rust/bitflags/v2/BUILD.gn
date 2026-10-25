@@ -74,6 +74,12 @@ cargo_crate("lib") {
 
   allow_unsafe = false
 
+  deps = [ "//third_party/rust/serde_core/v1:lib" ]
+  features = [
+    "serde",
+    "serde_core",
+  ]
+
   #####################################################################
   # Tweaking which GN `config`s apply to this target.
 

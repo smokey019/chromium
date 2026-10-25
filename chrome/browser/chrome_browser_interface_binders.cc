@@ -29,6 +29,7 @@
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/profiles/profile_manager.h"
 #include "chrome/browser/pwc/pwc_api_binder.h"
+#include "chrome/browser/reba_adblock/cosmetic_filters_impl.h"
 #include "chrome/browser/signin/identity_manager_factory.h"
 #include "chrome/browser/speech/on_device_speech_recognition_impl.h"
 #include "chrome/browser/ssl/chrome_security_state_util.h"
@@ -480,6 +481,9 @@ void PopulateChromeFrameBinders(
     map->Add<pwc::mojom::PrivilegedBridge>(&pwc::BindPrivilegedBridge);
   }
   map->Add<image_annotation::mojom::Annotator>(&BindImageAnnotator);
+
+  map->Add<reba_adblock::mojom::CosmeticFilters>(
+      &reba_adblock::CosmeticFiltersImpl::Create);
 
   map->Add<blink::mojom::ScriptToolHost>(
       &actor::ActorScriptToolReceiver::Create);

@@ -203,6 +203,12 @@
       <if expr="not is_android or enable_extensions_core">
         <!-- Page not available for guest. -->
         <include name="IDR_PAGE_NOT_AVAILABLE_FOR_GUEST_APP_HTML" file="resources\page_not_available_for_guest\app.html" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_BLOCKED_HTML" file="resources\reba_adblock\blocked.html" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_BLOCKED_CSS" file="resources\reba_adblock\blocked.css" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_BLOCKED_JS" file="resources\reba_adblock\blocked.js" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_POPUP_HTML" file="resources\reba_adblock\popup.html" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_POPUP_CSS" file="resources\reba_adblock\popup.css" type="BINDATA" />
+        <include name="IDR_REBA_ADBLOCK_POPUP_JS" file="resources\reba_adblock\popup.js" type="BINDATA" />
         <include name="IDR_INCOGNITO_NAVIGATION_BLOCKED_PAGE_HTML" file="resources\enterprise\incognito_navigation_blocked_page\incognito_blocked.html" flattenhtml="true" type="BINDATA" />
       </if>
       <if expr="not is_android">

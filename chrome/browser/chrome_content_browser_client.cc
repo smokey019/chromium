@@ -172,6 +172,10 @@
 #include "chrome/browser/profiles/renderer_updater.h"
 #include "chrome/browser/profiles/renderer_updater_factory.h"
 #include "chrome/browser/pwc/privileged_web_contents.h"
+#include "chrome/browser/reba_adblock/adblock_url_loader_factory.h"
+#include "chrome/browser/reba_adblock/reba_adblock_url_loader_throttle.h"
+#include "chrome/browser/reba_adblock/reba_adblock_popup.h"
+#include "chrome/browser/reba_adblock/reba_adblock_websocket.h"
 #include "chrome/browser/renderer_host/chrome_navigation_ui_data.h"
 #include "chrome/browser/renderer_preferences_util.h"
 #include "chrome/browser/safe_browsing/url_checker_delegate_impl.h"
@@ -4534,6 +4538,12 @@ bool ChromeContentBrowserClient::CanCreateWindow(
     return false;
   }
 
+  // The ad blocker's `$popup` filters: refuse the window before it exists, so
+  // no empty or "blocked" tab appears.
+  if (reba_adblock::ShouldBlockPopup(opener, target_url)) {
+    return false;
+  }
+
   // This block gives the Contextual Tasks feature the opportunity to intercept
   // tab creation in the event it doesn't go directly through the feature's
   // navigation throttle. When a new tab/window is created, it is done before
@@ -6340,6 +6350,13 @@ ChromeContentBrowserClient::CreateURLLoaderThrottles(
     result.push_back(std::move(glic_throttle));
   }
 
+  // The ad blocker's $removeparam filters, for top level pages.
+  if (auto adblock_throttle =
+          reba_adblock::RebaAdblockURLLoaderThrottle::MaybeCreate(
+              request, navigation_id)) {
+    result.push_back(std::move(adblock_throttle));
+  }
+
   return result;
 }
 
@@ -6947,6 +6964,12 @@ void ChromeContentBrowserClient::WillCreateURLLoaderFactory(
   }
 #endif
 
+  // The ad blocker. It comes after the webRequest proxy above, so extensions
+  // see requests before it does, and before the proxies below, so that what
+  // it blocks never reaches them.
+  reba_adblock::AdblockURLLoaderFactory::MaybeProxy(
+      browser_context, frame, type, request_initiator, factory_builder);
+
   // Install the HTTP Header Injection proxying factory.
   enterprise_custom_headers::HttpHeaderInjectionProxyingURLLoaderFactory::
       MaybeProxyRequest(browser_context, factory_builder);
@@ -7099,6 +7122,9 @@ ChromeContentBrowserClient::
 
 bool ChromeContentBrowserClient::WillInterceptWebSocket(
     content::RenderFrameHost* frame) {
+  if (reba_adblock::ShouldInterceptWebSocket(frame)) {
+    return true;
+  }
 #if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
   if (!frame) {
     return false;
@@ -7141,6 +7167,10 @@ void ChromeContentBrowserClient::CreateWebSocket(
     mojo::PendingRemote<network::mojom::WebSocketHandshakeClient>
         handshake_client,
     content::ContentBrowserClient::WebSocketOptions options) {
+  // The ad blocker may refuse the connection.
+  if (reba_adblock::MaybeBlockWebSocket(frame, url, handshake_client)) {
+    return;
+  }
 #if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
   // TODO(crbug.com/40195467): Request w/o a frame also should be proxied.
   if (!frame) {
@@ -7150,11 +7180,17 @@ void ChromeContentBrowserClient::CreateWebSocket(
       extensions::BrowserContextKeyedAPIFactory<extensions::WebRequestAPI>::Get(
           frame->GetBrowserContext());
 
-  DCHECK(web_request_api);
-  web_request_api->ProxyWebSocket(
-      frame, std::move(factory), url, site_for_cookies, user_agent,
-      std::move(handshake_client), std::move(options.header_client));
+  if (web_request_api && web_request_api->MayHaveProxiesForFrame(frame)) {
+    web_request_api->ProxyWebSocket(
+        frame, std::move(factory), url, site_for_cookies, user_agent,
+        std::move(handshake_client), std::move(options.header_client));
+    return;
+  }
 #endif
+  // Only the ad blocker wanted to look; connect as content would have.
+  reba_adblock::ConnectWebSocket(std::move(factory), url, user_agent,
+                                 std::move(handshake_client),
+                                 std::move(options.header_client));
 }
 
 void ChromeContentBrowserClient::WillCreateWebTransport(

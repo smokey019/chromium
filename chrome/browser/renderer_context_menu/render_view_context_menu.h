@@ -337,6 +337,8 @@ class RenderViewContextMenu
   bool IsLinkToIsolatedWebApp() const;
 
   void AppendDeveloperItems();
+  void AppendRebaAdblockItems();
+  void ExecuteRebaAdblockCommand(int id);
   void AppendDevtoolsForUnpackedExtensions();
   void AppendLinkItems();
   void AppendCopyLinkLocationItem();

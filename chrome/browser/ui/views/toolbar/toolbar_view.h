@@ -456,6 +456,9 @@ class ToolbarView : public views::AccessiblePaneView,
   raw_ptr<ToolbarButton> ai_overlay_dialog_button_ = nullptr;
 
   const raw_ptr<BrowserWindowInterface> browser_;
+
+  // The ad blocker's button; owned by the view hierarchy.
+  raw_ptr<views::View> reba_adblock_button_ = nullptr;
   const raw_ptr<BrowserView> browser_view_;
   base::WeakPtr<glic::GlicSplitButtonController> glic_split_button_controller_;
 

@@ -51,6 +51,14 @@ ${this.showResetProfileBanner_ ? html`
     </div>
   ` : '')}
 
+  ${cache(this.showPage_(this.pageVisibility_?.adblock) ? html`
+    <div slot="view" id="adblock">
+      ${cache(this.renderPlugin_(this.routes_.ADBLOCK) ? html`
+        <settings-adblock-page></settings-adblock-page>
+      ` : '')}
+    </div>
+  ` : '')}
+
   ${cache(this.showAiPage_(this.pageVisibility_?.ai) ? html`
     <div slot="view" id="ai">
       ${cache(this.renderPlugin_(this.routes_.AI) ? html`

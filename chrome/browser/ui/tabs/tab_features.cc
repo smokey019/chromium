@@ -56,6 +56,7 @@
 #include "chrome/browser/image_fetcher/image_fetcher_service_factory.h"
 #include "chrome/browser/indigo/indigo_cue_target.h"
 #include "chrome/browser/indigo/indigo_page_action_controller.h"
+#include "chrome/browser/reba_adblock/reba_adblock_tab_helper.h"
 #include "chrome/browser/lens/lens_suggestion_tool.h"
 #include "chrome/browser/loader/from_gws_navigation_and_keep_alive_request_observer.h"
 #include "chrome/browser/login_detection/login_detection_tab_helper.h"
@@ -444,6 +445,8 @@ void TabFeatures::Init(TabInterface& tab, Profile* profile) {
   }
 
   CreateSubresourceFilterWebContentsHelper(tab.GetContents());
+
+  reba_adblock::RebaAdblockTabHelper::CreateForWebContents(tab.GetContents());
 
   ChromeTranslateClient::CreateForWebContents(tab.GetContents());
 
@@ -1516,6 +1519,8 @@ void TabFeatures::WillDiscardContents(tabs::TabInterface* tab,
   }
 
   CreateSubresourceFilterWebContentsHelper(new_contents);
+
+  reba_adblock::RebaAdblockTabHelper::CreateForWebContents(new_contents);
 
   ChromeTranslateClient::CreateForWebContents(new_contents);
 

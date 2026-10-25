@@ -121,6 +121,11 @@ removed_librs_template = "removed_lib.rs.hbs"
 remove_crates = []
 root = "chromium"
 
+# REBA: engine of the built-in ad blocker (//components/reba_adblock).
+[crate.adblock]
+group = 'safe'
+extra_kv = { allow_unsafe = true }
+
 [crate.addr2line]
 allow_first_party_usage = false
 extra_kv = { allow_unsafe = true }
@@ -136,7 +141,9 @@ extra_kv = { allow_unsafe = true }
 [crate.aho-corasick]
 group = 'safe'
 allow_first_party_usage = false
-extra_kv = { allow_unsafe = false }
+# REBA: compiled into the browser now (regex -> adblock), and its packed searcher
+# is unsafe SIMD code.
+extra_kv = { allow_unsafe = true }
 
 [crate.android_system_properties]
 extra_kv = { allow_unsafe = true }
@@ -158,6 +165,9 @@ allow_first_party_usage = false
 allow_unsafe = true
 
 [crate.array-init]
+extra_kv = { allow_unsafe = true }
+
+[crate.arrayvec]
 extra_kv = { allow_unsafe = true }
 
 [crate.autocfg.extra_kv]
@@ -278,6 +288,12 @@ allow_unsafe = false
 [crate.crc32fast.extra_kv]
 allow_unsafe = true
 
+[crate.cssparser]
+extra_kv = { allow_unsafe = true }
+
+[crate.cssparser-macros]
+extra_kv = { allow_unsafe = false }
+
 [crate.ctor]
 extra_input_roots = ["../docs"]
 extra_kv = { allow_unsafe = false }
@@ -300,6 +316,14 @@ allow_unsafe = false
 
 [crate.cxxbridge-macro.extra_kv]
 allow_unsafe = false
+
+[crate.derive_more]
+extra_input_roots = ["../README.md", "../doc/**/*.md"]
+extra_kv = { allow_unsafe = false }
+
+[crate.derive_more-impl]
+extra_input_roots = ["../README.md", "../doc/**/*.md"]
+extra_kv = { allow_unsafe = false }
 
 [crate.derivre.extra_kv]
 allow_unsafe = false
@@ -331,6 +355,12 @@ multiversion_cleanup_bug = "https://crbug.com/482994758"
 
 [crate.displaydoc.extra_kv]
 allow_unsafe = false
+
+[crate.dtoa]
+extra_kv = { allow_unsafe = true }
+
+[crate.dtoa-short]
+extra_kv = { allow_unsafe = true }
 
 [crate.either.extra_kv]
 allow_unsafe = true
@@ -374,6 +404,9 @@ allow_unsafe = false
 [crate.fixed_decimal.extra_kv]
 allow_unsafe = true
 
+[crate.flatbuffers]
+extra_kv = { allow_unsafe = true }
+
 [crate.flate2]
 ban_features = [
     # `any_zlib` feature is banned because Chromium does not use the `zlib`
@@ -395,6 +428,9 @@ allow_unsafe = true
 
 [crate.font-types.extra_kv]
 allow_unsafe = true
+
+[crate.form_urlencoded]
+extra_kv = { allow_unsafe = true }
 
 [crate.fs2]
 group = 'test'
@@ -561,6 +597,12 @@ group = 'safe'
 allow_first_party_usage = true
 extra_kv = { allow_unsafe = false }
 
+[crate.idna]
+extra_kv = { allow_unsafe = true }
+
+[crate.idna_adapter]
+extra_kv = { allow_unsafe = false }
+
 [crate.image]
 extra_input_roots = ['../README.md']
 extra_kv = { allow_unsafe = true }
@@ -721,6 +763,9 @@ extra_kv = { allow_unsafe = true }
 [crate.murmur3]
 extra_kv = { allow_unsafe = false }
 
+[crate.new_debug_unreachable]
+extra_kv = { allow_unsafe = false }
+
 [crate.nix]
 group = 'test'
 allow_first_party_usage = false
@@ -784,6 +829,24 @@ extra_kv = { allow_unsafe = true }
 [crate.parking_lot_core]
 extra_kv = { allow_unsafe = true }
 
+[crate.percent-encoding]
+extra_kv = { allow_unsafe = true }
+
+[crate.phf]
+extra_kv = { allow_unsafe = false }
+
+[crate.phf_codegen]
+extra_kv = { allow_unsafe = false }
+
+[crate.phf_generator]
+extra_kv = { allow_unsafe = false }
+
+[crate.phf_macros]
+extra_kv = { allow_unsafe = false }
+
+[crate.phf_shared]
+extra_kv = { allow_unsafe = false }
+
 [crate.png.extra_kv]
 allow_unsafe = false
 # Web tests (aka WPT tests, also formerly known as Layout Tests) require fast
@@ -804,6 +867,9 @@ extra_kv = { allow_unsafe = true }
 
 [crate.potential_utf.extra_kv]
 allow_unsafe = true
+
+[crate.precomputed-hash]
+extra_kv = { allow_unsafe = false }
 
 [crate.primal-check]
 extra_kv = { allow_unsafe = false }
@@ -830,8 +896,11 @@ cpp_api_from_rust = true
 [crate.quote.extra_kv]
 allow_unsafe = false
 
+[crate.rand]
+extra_kv = { allow_unsafe = true }
+
 [crate.rand_core]
-extra_kv = { allow_unsafe = false }
+extra_kv = { allow_unsafe = true }
 
 [crate.read-fonts]
 extra_input_roots = ['../generated', '../data/generated']
@@ -844,8 +913,9 @@ extra_kv = { allow_unsafe = true }
 [crate.ref-cast-impl]
 extra_kv = { allow_unsafe = false }
 
+# REBA: needed by adblock (filter regexes); no longer test-only.
 [crate.regex]
-group = 'test'
+group = 'safe'
 allow_first_party_usage = false
 extra_kv = { allow_unsafe = true }
 
@@ -868,6 +938,12 @@ allow_unsafe = false
 extra_kv = { allow_unsafe = true }
 shipped = false
 
+[crate.rustc-hash]
+extra_kv = { allow_unsafe = false }
+
+[crate.rustc_version]
+extra_kv = { allow_unsafe = false }
+
 [crate.rustfft]
 extra_kv = { allow_unsafe = true }
 
@@ -885,6 +961,16 @@ allow_first_party_usage = false
 extra_kv = { allow_unsafe = true }
 
 [crate.scopeguard]
+extra_kv = { allow_unsafe = true }
+
+[crate.seahash]
+extra_kv = { allow_unsafe = true }
+
+[crate.selectors]
+build_script_outputs = [ "ascii_case_insensitive_html_attributes.rs" ]
+extra_kv = { allow_unsafe = true }
+
+[crate.semver]
 extra_kv = { allow_unsafe = true }
 
 [crate.serde]
@@ -914,6 +1000,9 @@ extra_kv = { allow_unsafe = false }
 [crate.serial_test_derive]
 extra_kv = { allow_unsafe = false }
 
+[crate.servo_arc]
+extra_kv = { allow_unsafe = true }
+
 [crate.sfv]
 extra_kv = { allow_unsafe = false }
 
@@ -932,8 +1021,9 @@ remove_deps = ['windows']
 allow_unsafe = true
 allow_unstable_features = ["stdarch_arm_neon_intrinsics"]
 
+# REBA: needed by phf_shared (cssparser, selectors) for the ad blocker.
 [crate.siphasher]
-group = 'test'
+group = 'safe'
 allow_first_party_usage = false
 extra_input_roots = ["../README.md"]
 extra_kv = { allow_unsafe = true }
@@ -1039,11 +1129,14 @@ allow_unsafe = false
 [crate.termcolor.extra_kv]
 allow_unsafe = false
 
-[crate.thiserror]
-build_script_outputs = [ "private.rs" ]
+[crate.thiserror-impl]
 extra_kv = { allow_unsafe = false }
 
-[crate.thiserror-impl]
+[crate."thiserror@v1"]
+extra_kv = { allow_unsafe = false }
+
+[crate."thiserror@v2"]
+build_script_outputs = [ "private.rs" ]
 extra_kv = { allow_unsafe = false }
 
 [crate.timezone_provider]
@@ -1105,6 +1198,9 @@ extra_kv = { allow_unsafe = false }
 
 [crate.unty]
 allow_first_party_usage = false
+extra_kv = { allow_unsafe = true }
+
+[crate.url]
 extra_kv = { allow_unsafe = true }
 
 [crate.utf16_iter]

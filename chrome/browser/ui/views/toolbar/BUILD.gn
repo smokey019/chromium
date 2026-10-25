@@ -226,6 +226,7 @@ source_set("impl") {
   }
 
   deps = [
+    "//chrome/browser/ui/views/reba_adblock",
     ":toolbar",
     "//base:i18n",
     "//build:branding_buildflags",

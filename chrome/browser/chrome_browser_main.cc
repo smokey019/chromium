@@ -46,6 +46,7 @@
 #include "chrome/browser/media/router/chrome_media_router_factory.h"
 #include "chrome/browser/media/webrtc/media_capture_devices_dispatcher.h"
 #include "chrome/browser/media/webrtc/webrtc_log_util.h"
+#include "chrome/browser/reba_adblock/reba_adblock_main_parts.h"
 #include "chrome/browser/memory/chrome_browser_main_extra_parts_memory.h"
 #include "chrome/browser/metrics/chrome_browser_main_extra_parts_metrics.h"
 #include "chrome/browser/metrics/chrome_feature_list_creator.h"
@@ -842,6 +843,8 @@ std::unique_ptr<content::BrowserMainParts> ChromeBrowserMainParts::Create(
       std::make_unique<ChromeBrowserMainExtraPartsPerformanceManager>());
 
   main_parts->AddParts(std::make_unique<ChromeBrowserMainExtraPartsMemory>());
+
+  main_parts->AddParts(std::make_unique<reba_adblock::RebaAdblockMainParts>());
 
   chrome::AddMetricsExtraParts(main_parts.get());
 

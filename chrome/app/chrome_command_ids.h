@@ -361,6 +361,11 @@
 // Other items.
 #define IDC_CONTENT_CONTEXT_TRANSLATE 50161
 #define IDC_CONTENT_CONTEXT_INSPECTELEMENT 50162
+// The ad blocker (REBA). Keep these numbers clear of the upstream ones: 50190
+// and 50191 are GOTOURL and SEARCHWEBFOR, and sharing them made "Search for"
+// toggle the ad blocker for the site.
+#define IDC_CONTENT_CONTEXT_REBA_BLOCK_ELEMENT 50300
+#define IDC_CONTENT_CONTEXT_REBA_TOGGLE_SITE 50301
 #define IDC_CONTENT_CONTEXT_LANGUAGE_SETTINGS 50164
 #define IDC_CONTENT_CONTEXT_LOOK_UP 50165
 #define IDC_CONTENT_CONTEXT_SPELLING_SUGGESTION 50167
