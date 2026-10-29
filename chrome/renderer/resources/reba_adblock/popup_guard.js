@@ -17,7 +17,12 @@
 //     area),
 //   * on a link whose own address is somewhere else than the new window, or
 //   * heard by a capture-phase listener on the window or document, which gets
-//     every click whatever it was on (that is how ad scripts listen).
+//     every click whatever it was on (that is how ad scripts listen), or
+//   * not in this window at all: Chrome lets a page open windows on a click in
+//     one of its frames, and ad scripts put their ad in a frame over the page
+//     (or watch the video player's frame) and open the window from the page.
+//     Only a window to the site of one of the page's frames is let through
+//     then, for widgets that ask the page to open their own site.
 // A button or a link that points at the window it opens is left alone, so
 // "sign in" pop-ups, share dialogs and payment windows keep working, and so do
 // new windows on the same site.
@@ -39,6 +44,8 @@ const dispatch = win.dispatchEvent.bind(win);
 const EventCtor = win.Event;
 const apply = Reflect.apply;
 const NativeProxy = Proxy;
+const querySelectorAll = win.Document.prototype.querySelectorAll;
+const getAttribute = win.Element.prototype.getAttribute;
 
 // How long after a click it still explains a window. User activation lasts
 // about five seconds.
@@ -47,17 +54,40 @@ const MAX_CLICK_AGE_MS = 6000;
 // Things whose click is about something else than opening a window. A video is
 // not here: clicking the player is the cover that ad scripts like best.
 const CONTROL_TAGS = new Set([
-  'button', 'input', 'select', 'textarea', 'option', 'label', 'summary',
+  'button',
+  'input',
+  'select',
+  'textarea',
+  'option',
+  'label',
+  'summary',
   'details',
 ]);
 
 const CLICK_TYPES = new Set([
-  'pointerdown', 'mousedown', 'pointerup', 'mouseup', 'click', 'auxclick',
-  'touchstart', 'touchend',
+  'pointerdown',
+  'mousedown',
+  'pointerup',
+  'mouseup',
+  'click',
+  'auxclick',
+  'touchstart',
+  'touchend',
 ]);
 const CONTROL_ROLES = new Set([
-  'button', 'link', 'menuitem', 'menuitemcheckbox', 'menuitemradio', 'tab',
-  'option', 'checkbox', 'radio', 'switch', 'combobox', 'textbox', 'treeitem',
+  'button',
+  'link',
+  'menuitem',
+  'menuitemcheckbox',
+  'menuitemradio',
+  'tab',
+  'option',
+  'checkbox',
+  'radio',
+  'switch',
+  'combobox',
+  'textbox',
+  'treeitem',
 ]);
 
 // --- Where the user last clicked ------------------------------------------
@@ -85,6 +115,15 @@ for (const type of CLICK_TYPES) {
   win.addEventListener(type, record, {capture: true, passive: true});
 }
 
+// A window opened on a key press (Enter on a link, a keyboard shortcut) is the
+// user's own doing.
+let lastKeyTime = -Infinity;
+win.addEventListener('keydown', event => {
+  if (event.isTrusted) {
+    lastKeyTime = nowOf();
+  }
+}, {capture: true, passive: true});
+
 // --- What a click was on ----------------------------------------------------
 
 // An element that fills much of the window is a layer put over the page, not
@@ -92,8 +131,7 @@ for (const type of CLICK_TYPES) {
 function coversMostOfWindow(element) {
   try {
     const rect = element.getBoundingClientRect();
-    return rect.width * rect.height >=
-        0.5 * win.innerWidth * win.innerHeight;
+    return rect.width * rect.height >= 0.5 * win.innerWidth * win.innerHeight;
   } catch (e) {
     return false;
   }
@@ -178,6 +216,24 @@ function parse(text) {
   }
 }
 
+// The sites of this document's frames that have an address of their own (not
+// srcdoc or about:blank ones, which are the page's own content).
+function frameSites() {
+  const sites = new Set();
+  try {
+    const frames = apply(querySelectorAll, doc, ['iframe[src], frame[src]']);
+    for (let i = 0; i < frames.length; i++) {
+      const url = parse(apply(getAttribute, frames[i], ['src']) || '');
+      if (url && isWeb(url)) {
+        sites.add(siteOf(url.hostname));
+      }
+    }
+  } catch (e) {
+    // No frames then.
+  }
+  return sites;
+}
+
 // --- The decision -----------------------------------------------------------
 
 function isNewWindowTarget(name) {
@@ -230,9 +286,6 @@ function decide(rawUrl, targetName) {
       !isNewWindowTarget(String(targetName))) {
     return false;
   }
-  if (!last || nowOf() - last.time > MAX_CLICK_AGE_MS) {
-    return false;
-  }
   try {
     // Without a click's permission Chrome's own pop-up blocker is in charge.
     if (!win.navigator.userActivation.isActive) {
@@ -240,6 +293,12 @@ function decide(rawUrl, targetName) {
     }
   } catch (e) {
     // Older engine; go on.
+  }
+  const now = nowOf();
+  const clickedHere = !!last && now - last.time <= MAX_CLICK_AGE_MS;
+  if (now - lastKeyTime <= MAX_CLICK_AGE_MS &&
+      (!clickedHere || lastKeyTime >= last.time)) {
+    return false;
   }
 
   const text = rawUrl === undefined || rawUrl === null ? '' : String(rawUrl);
@@ -260,6 +319,15 @@ function decide(rawUrl, targetName) {
   }
   // An empty or about:blank window is cross-site until proven otherwise: the
   // classic trick opens it and sends it to the ad afterwards.
+
+  if (!clickedHere) {
+    // The permission comes from a click in another frame. A widget may ask the
+    // page to open its own site; anything else is an ad that put a frame over
+    // the page or listens to the player's frame.
+    return !(
+        destination && isWeb(destination) &&
+        frameSites().has(siteOf(destination.hostname)));
+  }
 
   const found = last.found;
   if (inGlobalCaptureListener()) {
@@ -310,7 +378,8 @@ function refuse(url, how) {
   }
 }
 
-// --- Hooks --------------------------------------------------------------------
+// --- Hooks
+// --------------------------------------------------------------------
 
 function hookMethod(owner, name, handler) {
   const desc = Object.getOwnPropertyDescriptor(owner, name);
@@ -354,17 +423,16 @@ hookMethod(win.HTMLElement.prototype, 'click', (original, thisArg, args) => {
   return apply(original, thisArg, args);
 });
 
-hookMethod(win.EventTarget.prototype, 'dispatchEvent',
-           (original, thisArg, args) => {
-             const event = args[0];
-             if (event && event.type === 'click' && !event.isTrusted &&
-                 thisArg instanceof win.HTMLAnchorElement &&
-                 refusesLink(thisArg)) {
-               refuse(thisArg.href, 'dispatch');
-               return false;
-             }
-             return apply(original, thisArg, args);
-           });
+hookMethod(
+    win.EventTarget.prototype, 'dispatchEvent', (original, thisArg, args) => {
+      const event = args[0];
+      if (event && event.type === 'click' && !event.isTrusted &&
+          thisArg instanceof win.HTMLAnchorElement && refusesLink(thisArg)) {
+        refuse(thisArg.href, 'dispatch');
+        return false;
+      }
+      return apply(original, thisArg, args);
+    });
 
 for (const name of ['submit', 'requestSubmit']) {
   hookMethod(win.HTMLFormElement.prototype, name, (original, thisArg, args) => {
@@ -379,9 +447,8 @@ for (const name of ['submit', 'requestSubmit']) {
 }
 
 // A same-origin frame made by the page has its own window.open.
-const frameWindow =
-    Object.getOwnPropertyDescriptor(win.HTMLIFrameElement.prototype,
-                                    'contentWindow');
+const frameWindow = Object.getOwnPropertyDescriptor(
+    win.HTMLIFrameElement.prototype, 'contentWindow');
 if (frameWindow && frameWindow.get) {
   frameWindow.get = new NativeProxy(frameWindow.get, {
     apply(original, thisArg, args) {
@@ -396,7 +463,7 @@ if (frameWindow && frameWindow.get) {
       return result;
     },
   });
-  Object.defineProperty(win.HTMLIFrameElement.prototype, 'contentWindow',
-                        frameWindow);
+  Object.defineProperty(
+      win.HTMLIFrameElement.prototype, 'contentWindow', frameWindow);
 }
 })();

@@ -4,7 +4,27 @@
 
 import {html} from 'chrome://resources/lit/v3_0/lit.rollup.js';
 
+import type {ExceptionKind} from './adblock_browser_proxy.js';
 import type {SettingsAdblockSitesTabElement} from './adblock_sites_tab.js';
+
+function renderExceptions(
+    this: SettingsAdblockSitesTabElement, kind: ExceptionKind, title: string,
+    explanation: string, sites: string[]) {
+  // clang-format off
+  return html`
+      <h3 class="section-title">${title}</h3>
+      <div class="sub-label">${explanation}</div>
+      ${sites.length === 0 ? html`
+        <div class="empty">None.</div>` : sites.map(site => html`
+        <div class="row">
+          <div class="grow label">${site}</div>
+          <cr-button
+              @click="${() => this.proxy_.removeExceptionSite(kind, site)}">
+            Remove
+          </cr-button>
+        </div>`)}`;
+  // clang-format on
+}
 
 export function getHtml(this: SettingsAdblockSitesTabElement) {
   const state = this.state;
@@ -39,6 +59,14 @@ export function getHtml(this: SettingsAdblockSitesTabElement) {
                 </cr-button>
               </div>`)}
           </div>`}
+        ${renderExceptions.call(this, 'popup', 'Pop-ups allowed',
+        'The pop-up guard is off on these sites (filter lists still apply). ' +
+            'Add one from a refused pop-up in the log.',
+        state.popupGuardAllowedSites)}
+        ${renderExceptions.call(this, 'download', 'Downloads not held',
+        'Downloads that start on their own are not held on these sites. ' +
+            'Add one from a held download in the log.',
+        state.downloadGuardAllowedSites)}
       </div>`;
   // clang-format on
 }

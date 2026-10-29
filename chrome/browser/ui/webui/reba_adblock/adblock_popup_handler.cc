@@ -95,12 +95,18 @@ base::DictValue AdblockPopupHandler::BuildState() {
 
   int blocked = 0;
   int hidden = 0;
+  int popups = 0;
+  int downloads = 0;
+  int threats = 0;
   base::ListValue items;
   if (source) {
     if (RebaAdblockTabHelper* helper =
             RebaAdblockTabHelper::FromWebContents(source)) {
       blocked = helper->blocked_count();
       hidden = helper->hidden_element_count();
+      popups = helper->popups_stopped();
+      downloads = helper->downloads_held();
+      threats = helper->threats_blocked();
       for (const RebaAdblockTabHelper::BlockedItem& item :
            helper->blocked_items()) {
         base::DictValue dict;
@@ -114,15 +120,18 @@ base::DictValue AdblockPopupHandler::BuildState() {
   }
   state.Set("blockedCount", blocked);
   state.Set("hiddenCount", hidden);
+  state.Set("popupsStopped", popups);
+  state.Set("downloadsHeld", downloads);
+  state.Set("threatsBlocked", threats);
   state.Set("items", std::move(items));
   return state;
 }
 
 void AdblockPopupHandler::NotifySoon() {
   if (!notify_timer_.IsRunning()) {
-    notify_timer_.Start(FROM_HERE, kNotifyDelay,
-                        base::BindOnce(&AdblockPopupHandler::Notify,
-                                       base::Unretained(this)));
+    notify_timer_.Start(
+        FROM_HERE, kNotifyDelay,
+        base::BindOnce(&AdblockPopupHandler::Notify, base::Unretained(this)));
   }
 }
 
@@ -209,8 +218,7 @@ void AdblockPopupHandler::HandleOpenSettings(const base::ListValue& args) {
     return;
   }
   std::string url = "chrome://settings/adblock";
-  if (args.size() >= 1 && args[0].is_string() &&
-      args[0].GetString() == "log") {
+  if (args.size() >= 1 && args[0].is_string() && args[0].GetString() == "log") {
     url += "?tab=log";
   }
   source->OpenURL(

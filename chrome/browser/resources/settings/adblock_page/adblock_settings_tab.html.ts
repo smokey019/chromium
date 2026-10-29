@@ -34,7 +34,9 @@ export function getHtml(this: SettingsAdblockSettingsTabElement) {
       <div class="tab-body">
         <div class="intro">
           Blocks ads, trackers and malicious sites using filter lists, the same
-          way uBlock Origin does. Everything runs inside the browser.
+          way uBlock Origin does, and protects you from pop-ups, downloads and
+          files that pages push on you. Everything runs inside the browser,
+          and the log shows what was stopped and lets you allow it.
         </div>
         ${renderToggle.call(this, 'enabled', 'Block ads and trackers',
         'The main switch. Turn it off to stop all blocking everywhere.',
@@ -51,6 +53,32 @@ export function getHtml(this: SettingsAdblockSettingsTabElement) {
             'not on a link or button for it, whether or not a filter list ' +
             'knows the ad. Blocked pop-ups show up in the log.',
         state.popupGuard)}
+        ${renderToggle.call(this, 'downloadGuard',
+        'Hold risky downloads that start on their own',
+        'Programs, installers, scripts and archives are held for you to keep ' +
+            'or delete when a page starts them without you clicking a ' +
+            'download link, when an ad on the page starts them, or when they ' +
+            'come from a pop-up another site opened. Held downloads show up ' +
+            'in the log.',
+        state.downloadGuard)}
+        ${renderToggle.call(this, 'antivirus',
+        'Check programs and archives with Windows antivirus',
+        'Before a page gets a program, installer or archive, it is handed to ' +
+            'the antivirus Windows uses (Microsoft Defender, or the one you ' +
+            'installed). A file it finds a threat in never reaches the page ' +
+            'or the disk. Such files are not kept in the browser cache.',
+        state.antivirus)}
+        <div class="row">
+          <div class="grow">
+            <div class="label">Quieter notification prompts</div>
+            <div class="sub-label">
+              Sites can't pop up "Allow notifications?"; a bell in the address
+              bar lets you allow a site you want. Change it under
+              <a href="chrome://settings/content/notifications"
+                  target="_blank">Notifications</a>.
+            </div>
+          </div>
+        </div>
         ${renderToggle.call(this, 'autoUpdate', 'Update the lists automatically',
         'Download new versions of the filter lists when they are out of date.',
         state.autoUpdate)}

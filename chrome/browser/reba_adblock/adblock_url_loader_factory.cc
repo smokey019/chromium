@@ -9,8 +9,11 @@
 #include "base/byte_size.h"
 #include "base/functional/bind.h"
 #include "base/memory/raw_ptr.h"
+#include "base/task/sequenced_task_runner.h"
 #include "chrome/browser/reba_adblock/reba_adblock_service.h"
 #include "chrome/browser/reba_adblock/reba_adblock_tab_helper.h"
+#include "chrome/browser/reba_adblock/response_scanner.h"
+#include "components/reba_adblock/core/security_log.h"
 #include "content/public/browser/browser_context.h"
 #include "content/public/browser/render_frame_host.h"
 #include "content/public/browser/web_contents.h"
@@ -110,6 +113,31 @@ void RecordBlock(content::GlobalRenderFrameHostId frame_id,
   }
 }
 
+// Logs a file that the antivirus check refused, and counts it for the tab.
+void RecordThreat(content::GlobalRenderFrameHostId frame_id,
+                  bool incognito,
+                  const GURL& url,
+                  const GURL& page_url,
+                  std::string reason) {
+  if (RebaAdblockService* service = RebaAdblockService::Get()) {
+    SecurityEvent event;
+    event.kind = SecurityEventKind::kAntivirus;
+    event.url = url.spec();
+    event.page_host = page_url.host();
+    event.reason = std::move(reason);
+    service->RecordSecurityEvent(std::move(event), incognito);
+  }
+  content::RenderFrameHost* frame = content::RenderFrameHost::FromID(frame_id);
+  content::WebContents* web_contents =
+      frame ? content::WebContents::FromRenderFrameHost(frame) : nullptr;
+  if (web_contents) {
+    if (RebaAdblockTabHelper* helper =
+            RebaAdblockTabHelper::FromWebContents(web_contents)) {
+      helper->OnThreatBlocked();
+    }
+  }
+}
+
 // One request that went through the factory. It owns itself. As in the
 // webRequest proxy (extensions/browser/api/web_request/
 // web_request_proxying_url_loader_factory.cc), it goes away with the request:
@@ -119,8 +147,11 @@ void RecordBlock(content::GlobalRenderFrameHostId frame_id,
 class ProxiedRequest : public network::mojom::URLLoader,
                        public network::mojom::URLLoaderClient {
  public:
+  // With `scan_responses`, programs and archives that come back are handed to
+  // the antivirus before the page gets them (see response_scanner.h).
   ProxiedRequest(content::GlobalRenderFrameHostId frame_id,
                  bool incognito,
+                 bool scan_responses,
                  GURL page_url,
                  RequestType type,
                  GURL url,
@@ -128,6 +159,7 @@ class ProxiedRequest : public network::mojom::URLLoader,
                  mojo::PendingRemote<network::mojom::URLLoaderClient> client)
       : frame_id_(frame_id),
         incognito_(incognito),
+        scan_responses_(scan_responses),
         page_url_(std::move(page_url)),
         type_(type),
         url_(std::move(url)),
@@ -220,6 +252,16 @@ class ProxiedRequest : public network::mojom::URLLoader,
   // The network closed its end without saying how the request ended (it
   // always calls OnComplete() first, which is handled before this).
   void OnNetworkDisconnected() {
+    if (held_head_) {
+      // The body is being checked; the network is done with its part (or gave
+      // up, which the end of the body shows). The page gets the response and
+      // the end once the check is over.
+      client_receiver_.reset();
+      if (!held_status_) {
+        held_status_ = network::URLLoaderCompletionStatus(net::ERR_ABORTED);
+      }
+      return;
+    }
     target_client_->OnComplete(
         network::URLLoaderCompletionStatus(net::ERR_ABORTED));
     Destroy();
@@ -248,8 +290,59 @@ class ProxiedRequest : public network::mojom::URLLoader,
       network::mojom::URLResponseHeadPtr head,
       mojo::ScopedDataPipeConsumerHandle body,
       std::optional<mojo_base::BigBuffer> cached_metadata) override {
+    if (scan_responses_ && body) {
+      const ScanNeed need = ScanNeedFor(*head, url_);
+      // A body that says it is too large to keep in memory goes through
+      // unchecked (the antivirus still sees it if it is saved).
+      if (need != ScanNeed::kNone &&
+          head->content_length <=
+              static_cast<int64_t>(ResponseScanner::kMaxScanBytes)) {
+        held_head_ = std::move(head);
+        held_metadata_ = std::move(cached_metadata);
+        scanner_ = std::make_unique<ResponseScanner>(
+            std::move(body), need, url_.spec(),
+            base::BindOnce(&ProxiedRequest::OnScanned, base::Unretained(this)));
+        return;
+      }
+    }
     target_client_->OnReceiveResponse(std::move(head), std::move(body),
                                       std::move(cached_metadata));
+  }
+
+  // The antivirus check of the body is done.
+  void OnScanned(ResponseScanner::Outcome outcome,
+                 mojo::ScopedDataPipeConsumerHandle body) {
+    // This may end the request, from inside the scanner.
+    base::SequencedTaskRunner::GetCurrentDefault()->DeleteSoon(
+        FROM_HERE, std::move(scanner_));
+    if (outcome == ResponseScanner::Outcome::kThreat ||
+        outcome == ResponseScanner::Outcome::kTooLarge ||
+        outcome == ResponseScanner::Outcome::kFailed) {
+      if (outcome != ResponseScanner::Outcome::kFailed) {
+        RecordThreat(frame_id_, incognito_, url_, page_url_,
+                     outcome == ResponseScanner::Outcome::kThreat
+                         ? "page-file"
+                         : "too-large");
+      }
+      target_loader_.reset();
+      client_receiver_.reset();
+      target_client_->OnComplete(network::URLLoaderCompletionStatus(
+          outcome == ResponseScanner::Outcome::kFailed
+              ? net::ERR_INSUFFICIENT_RESOURCES
+              : net::ERR_BLOCKED_BY_CLIENT));
+      Destroy();
+      return;
+    }
+    target_client_->OnReceiveResponse(std::move(held_head_), std::move(body),
+                                      std::move(held_metadata_));
+    if (held_transfer_size_) {
+      target_client_->OnTransferSizeUpdated(held_transfer_size_);
+      held_transfer_size_ = 0;
+    }
+    if (held_status_) {
+      target_client_->OnComplete(*held_status_);
+      Destroy();
+    }
   }
   void OnReceiveRedirect(const net::RedirectInfo& redirect_info,
                          network::mojom::URLResponseHeadPtr head) override {
@@ -277,9 +370,20 @@ class ProxiedRequest : public network::mojom::URLLoader,
                                      std::move(callback));
   }
   void OnTransferSizeUpdated(int32_t transfer_size_diff) override {
+    if (held_head_) {
+      // Sent once the page has the response.
+      held_transfer_size_ += transfer_size_diff;
+      return;
+    }
     target_client_->OnTransferSizeUpdated(transfer_size_diff);
   }
   void OnComplete(const network::URLLoaderCompletionStatus& status) override {
+    if (held_head_) {
+      // The body is still being checked; the page hears of the end after it
+      // has the response.
+      held_status_ = status;
+      return;
+    }
     target_client_->OnComplete(status);
     // The body, if any, goes straight to the renderer through its data pipe;
     // nothing more comes through here.
@@ -289,9 +393,18 @@ class ProxiedRequest : public network::mojom::URLLoader,
  private:
   const content::GlobalRenderFrameHostId frame_id_;
   const bool incognito_;
+  const bool scan_responses_;
   const GURL page_url_;
   const RequestType type_;
   GURL url_;
+
+  // While the antivirus check runs: the scanner, and what the network sent
+  // that the page gets after the response.
+  std::unique_ptr<ResponseScanner> scanner_;
+  network::mojom::URLResponseHeadPtr held_head_;
+  std::optional<mojo_base::BigBuffer> held_metadata_;
+  std::optional<network::URLLoaderCompletionStatus> held_status_;
+  int32_t held_transfer_size_ = 0;
 
   // The renderer's end.
   mojo::Receiver<network::mojom::URLLoader> loader_receiver_;
@@ -358,7 +471,10 @@ void AdblockURLLoaderFactory::CreateLoaderAndStart(
     mojo::PendingRemote<network::mojom::URLLoaderClient> client,
     const net::MutableNetworkTrafficAnnotationTag& traffic_annotation) {
   RebaAdblockService* service = RebaAdblockService::Get();
-  if (!service || !service->IsEnabled() || !IsFilterable(request.url)) {
+  // The antivirus check works with ad blocking off too.
+  if (!service ||
+      (!service->IsEnabled() && !service->antivirus_check_enabled()) ||
+      !IsFilterable(request.url)) {
     target_factory_->CreateLoaderAndStart(std::move(loader), request_id,
                                           options, request, std::move(client),
                                           traffic_annotation);
@@ -374,9 +490,9 @@ void AdblockURLLoaderFactory::CreateLoaderAndStart(
                                           traffic_annotation);
     return;
   }
-  auto* proxied =
-      new ProxiedRequest(frame_id_, incognito_, page_url, type, request.url,
-                         std::move(loader), std::move(client));
+  auto* proxied = new ProxiedRequest(
+      frame_id_, incognito_, service->antivirus_check_enabled(), page_url, type,
+      request.url, std::move(loader), std::move(client));
 
   const Decision decision =
       service->CheckRequest(request.url, page_url, type, request.method);

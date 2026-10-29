@@ -11,6 +11,8 @@ static_library("core") {
     "filter_list_catalog.cc",
     "filter_list_catalog.h",
     "filter_list_catalog_data.inc",
+    "security_log.cc",
+    "security_log.h",
     "user_filters.cc",
     "user_filters.h",
   ]
@@ -27,6 +29,7 @@ source_set("unit_tests") {
     "blocked_request_log_unittest.cc",
     "engine_set_unittest.cc",
     "filter_list_catalog_unittest.cc",
+    "security_log_unittest.cc",
     "user_filters_unittest.cc",
   ]
   deps = [

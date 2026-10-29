@@ -77,6 +77,7 @@
 #include "chrome/browser/profiles/keep_alive/scoped_profile_keep_alive.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/reading_list/reading_list_model_factory.h"
+#include "chrome/browser/reba_adblock/reba_adblock_service.h"
 #include "chrome/browser/safe_browsing/verdict_cache_manager_factory.h"
 #include "chrome/browser/search_engine_choice/search_engine_choice_service_factory.h"
 #include "chrome/browser/search_engines/template_url_service_factory.h"
@@ -420,6 +421,13 @@ void ChromeBrowsingDataRemoverDelegate::RemoveEmbedderData(
   //////////////////////////////////////////////////////////////////////////////
   // DATA_TYPE_HISTORY
   if ((remove_mask & constants::DATA_TYPE_HISTORY) && may_delete_history) {
+    // REBA: the protection log lists addresses and file names too. Nothing of
+    // an off-the-record profile is in it.
+    if (reba_adblock::RebaAdblockService* adblock =
+            reba_adblock::RebaAdblockService::Get();
+        adblock && !profile_->IsOffTheRecord()) {
+      adblock->ClearSecurityEventsBetween(delete_begin_, delete_end_);
+    }
     history::HistoryService* history_service =
         HistoryServiceFactory::GetForProfile(
             profile_, ServiceAccessType::EXPLICIT_ACCESS);

@@ -88,7 +88,8 @@ void CosmeticFiltersImpl::GetCosmeticResources(
       render_frame_host().GetParentOrOuterDocument() ? TopLevelUrl() : url;
   if (service && service->IsEnabled() && url.SchemeIsHTTPOrHTTPS() &&
       !service->IsSiteTrusted(top_level)) {
-    resources->popup_guard = service->PopupGuardEnabled();
+    resources->popup_guard = service->PopupGuardEnabled() &&
+                             !service->IsPopupGuardAllowedOn(top_level);
   }
   if (service && service->IsCosmeticFilteringEnabled() &&
       url.SchemeIsHTTPOrHTTPS() && !service->IsSiteTrusted(top_level)) {
@@ -162,7 +163,8 @@ void CosmeticFiltersImpl::ReportBlockedPopup(const GURL& url) {
     return;
   }
   const GURL page_url = TopLevelUrl();
-  if (!page_url.SchemeIsHTTPOrHTTPS() || service->IsSiteTrusted(page_url)) {
+  if (!page_url.SchemeIsHTTPOrHTTPS() || service->IsSiteTrusted(page_url) ||
+      service->IsPopupGuardAllowedOn(page_url)) {
     return;
   }
   Decision decision;

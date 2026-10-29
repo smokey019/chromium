@@ -40,6 +40,11 @@ export interface AdblockState {
   showBlockedCount: boolean;
   contextMenu: boolean;
   popupGuard: boolean;
+  downloadGuard: boolean;
+  antivirus: boolean;
+  // Sites where the pop-up guard / the download guard is off.
+  popupGuardAllowedSites: string[];
+  downloadGuardAllowedSites: string[];
   totalBlocked: number;
   updating: boolean;
   ready: boolean;
@@ -48,7 +53,20 @@ export interface AdblockState {
   trustedSites: string[];
 }
 
+// What an entry of the protection log is about: a blocked request ("ads"),
+// a refused pop-up, a held download, an antivirus detection or a Safe Browsing
+// warning.
+export type LogKind = 'ads'|'popup'|'download'|'antivirus'|'safebrowsing';
+
 export interface BlockedRequestInfo {
+  kind: LogKind;
+  // Downloads: the file name.
+  file?: string;
+  // Why, as a code (see reasonText_() in adblock_log_tab.ts).
+  reason?: string;
+  detail?: string;
+  // Milliseconds since the epoch: the first time (protection events only).
+  first?: number;
   url: string;
   type: string;
   pageHost: string;
@@ -63,12 +81,13 @@ export interface BlockedRequestInfo {
 // (kMaxUserFiltersBytes in reba_adblock_service.h).
 export const MAX_USER_FILTERS_BYTES = 1024 * 1024;
 
-export type BoolSetting =
-    'enabled'|'cosmetic'|'autoUpdate'|'showBlockedCount'|'contextMenu'|
-    'popupGuard';
+export type BoolSetting = 'enabled'|'cosmetic'|'autoUpdate'|'showBlockedCount'|
+    'contextMenu'|'popupGuard'|'downloadGuard'|'antivirus';
 
-export type LogAction =
-    'allowAlways'|'allowOnSite'|'allowSession'|'blockAlways';
+export type LogAction = 'allowAlways'|'allowOnSite'|'allowSession'|
+    'blockAlways'|'allowPopupsOnSite'|'stopHoldingOnSite';
+
+export type ExceptionKind = 'popup'|'download';
 
 export interface AddListResult {
   ok: boolean;
@@ -91,6 +110,9 @@ export interface AdblockBrowserProxy {
   getLog(): Promise<BlockedRequestInfo[]>;
   clearLog(): void;
   logAction(action: LogAction, url: string, pageHost: string): void;
+  // Resolves to false if `site` is not a host name.
+  addExceptionSite(kind: ExceptionKind, site: string): Promise<boolean>;
+  removeExceptionSite(kind: ExceptionKind, site: string): void;
 }
 
 export class AdblockBrowserProxyImpl implements AdblockBrowserProxy {
@@ -144,6 +166,14 @@ export class AdblockBrowserProxyImpl implements AdblockBrowserProxy {
 
   logAction(action: LogAction, url: string, pageHost: string) {
     chrome.send('rebaAdblockLogAction', [action, url, pageHost]);
+  }
+
+  addExceptionSite(kind: ExceptionKind, site: string) {
+    return sendWithPromise<boolean>('rebaAdblockAddExceptionSite', kind, site);
+  }
+
+  removeExceptionSite(kind: ExceptionKind, site: string) {
+    chrome.send('rebaAdblockRemoveExceptionSite', [kind, site]);
   }
 
   static getInstance(): AdblockBrowserProxy {
