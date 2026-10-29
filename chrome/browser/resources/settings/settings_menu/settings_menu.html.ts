@@ -177,6 +177,12 @@ export function getHtml(this: SettingsMenuElement) {
           <span class="menu-label">$i18n{aboutPageTitle}</span>
           <cr-ripple></cr-ripple>
         </a>
+        <a role="menuitem" id="whatsNew" href="/whatsNew"
+            class="cr-nav-menu-item">
+          <cr-icon icon="settings20:checklist"></cr-icon>
+          <span class="menu-label">What's new</span>
+          <cr-ripple></cr-ripple>
+        </a>
       </cr-menu-selector>
     </div>
 

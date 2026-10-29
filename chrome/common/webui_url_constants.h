@@ -593,6 +593,8 @@ inline constexpr char kTravelSubPage[] = "travel";
 inline constexpr char kShoppingSubPage[] = "shopping";
 inline constexpr char kPeopleSubPage[] = "people";
 inline constexpr char kPerformanceSubPage[] = "performance";
+// REBA: the release notes.
+inline constexpr char kRebaWhatsNewSubPage[] = "whatsNew";
 inline constexpr char kPrivacyGuideSubPage[] = "privacy/guide";
 inline constexpr char kPrivacySandboxMeasurementSubpage[] =
     "adPrivacy/measurement";

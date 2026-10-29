@@ -2497,6 +2497,13 @@ void AppMenuModel::Build() {
 #endif
 #endif
 
+  // REBA: the release notes (chrome://settings/whatsNew).
+  AddItemWithIcon(IDC_REBA_WHATS_NEW, u"What's new in REBA",
+                  ui::ImageModel::FromVectorIcon(
+                      features::IsRoundedIconsEnabled() ? kReleaseAlertIcon
+                                                        : kReleaseAlertOldIcon,
+                      ui::kColorMenuIcon, kDefaultIconSize));
+
   AddItemWithStringIdAndVectorIcon(
       this, IDC_OPTIONS, IDS_SETTINGS,
       features::IsRoundedIconsEnabled() ? kSettingsIcon : kSettingsMenuOldIcon);

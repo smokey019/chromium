@@ -1387,6 +1387,10 @@ void BrowserCommandController::HandleCommandWithDisposition(
     case IDC_ABOUT:
       ShowAboutChrome(webui::GetBrowserForOpeningWebUi(browser_));
       break;
+    case IDC_REBA_WHATS_NEW:
+      ShowSettingsSubPage(webui::GetBrowserForOpeningWebUi(browser_),
+                          chrome::kRebaWhatsNewSubPage);
+      break;
     case IDC_UPGRADE_DIALOG:
       MaybeUpdateChrome(browser_);
       break;
@@ -2493,6 +2497,7 @@ void BrowserCommandController::UpdateCommandsForFullscreenMode() {
   command_updater_->UpdateCommandEnabled(IDC_EDIT_SEARCH_ENGINES, show_main_ui);
   command_updater_->UpdateCommandEnabled(IDC_VIEW_PASSWORDS, show_main_ui);
   command_updater_->UpdateCommandEnabled(IDC_ABOUT, show_main_ui);
+  command_updater_->UpdateCommandEnabled(IDC_REBA_WHATS_NEW, show_main_ui);
 #if BUILDFLAG(GOOGLE_CHROME_BRANDING)
   command_updater_->UpdateCommandEnabled(IDC_CHROME_TIPS, show_main_ui);
   command_updater_->UpdateCommandEnabled(IDC_CHROME_WHATS_NEW, show_main_ui);

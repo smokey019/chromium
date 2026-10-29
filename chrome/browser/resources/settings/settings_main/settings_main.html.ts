@@ -181,6 +181,12 @@ ${this.showResetProfileBanner_ ? html`
       </settings-about-page>
     ` : '')}
   </div>
+
+  <div slot="view" id="whatsNew">
+    ${cache(this.renderPlugin_(this.routes_.WHATS_NEW) ? html`
+      <settings-whats-new-page></settings-whats-new-page>
+    ` : '')}
+  </div>
 </cr-view-manager>
 <!--_html_template_end_-->`;
 }
