@@ -131,7 +131,7 @@ void RebaAdblockService::Start() {
         prefs::kShowBlockedCount, prefs::kContextMenuEnabled,
         prefs::kPopupGuard, prefs::kAutoUpdate, prefs::kPopupGuardAllowedSites,
         prefs::kDownloadGuard, prefs::kDownloadGuardAllowedSites,
-        prefs::kAntivirusCheck}) {
+        prefs::kAntivirusCheck, prefs::kBestVideoQuality}) {
     pref_registrar_.Add(pref,
                         base::BindRepeating(&RebaAdblockService::OnPrefChanged,
                                             base::Unretained(this), pref));
@@ -385,6 +385,16 @@ void RebaAdblockService::SetDownloadGuard(bool enabled) {
 
 void RebaAdblockService::SetAntivirusCheck(bool enabled) {
   local_state_->SetBoolean(prefs::kAntivirusCheck, enabled);
+}
+
+// --- Video ---
+
+void RebaAdblockService::SetBestVideoQuality(bool enabled) {
+  local_state_->SetBoolean(prefs::kBestVideoQuality, enabled);
+}
+
+bool RebaAdblockService::BestVideoQualityEnabled() const {
+  return local_state_->GetBoolean(prefs::kBestVideoQuality);
 }
 
 const char* RebaAdblockService::ExceptionPref(Exception which) const {

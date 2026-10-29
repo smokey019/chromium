@@ -79,6 +79,14 @@ export function getHtml(this: SettingsAdblockSettingsTabElement) {
             </div>
           </div>
         </div>
+        ${renderToggle.call(this, 'bestVideoQuality',
+        'Play videos in the best quality',
+        'Streaming players start low and work their way up, and some stay ' +
+            'low. This gives them only the best quality the site offers, so ' +
+            'videos play at it from the start. On a slow connection they may ' +
+            'pause to buffer. Sites decide how high protected shows go in ' +
+            'this browser, often below HD.',
+        state.bestVideoQuality)}
         ${renderToggle.call(this, 'autoUpdate', 'Update the lists automatically',
         'Download new versions of the filter lists when they are out of date.',
         state.autoUpdate)}

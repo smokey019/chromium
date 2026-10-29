@@ -155,6 +155,8 @@ void AdblockSettingsHandler::HandleSetBool(const base::ListValue& args) {
     service->SetDownloadGuard(value);
   } else if (name == "antivirus") {
     service->SetAntivirusCheck(value);
+  } else if (name == "bestVideoQuality") {
+    service->SetBestVideoQuality(value);
   }
 }
 

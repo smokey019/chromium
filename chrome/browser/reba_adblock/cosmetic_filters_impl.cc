@@ -91,6 +91,9 @@ void CosmeticFiltersImpl::GetCosmeticResources(
     resources->popup_guard = service->PopupGuardEnabled() &&
                              !service->IsPopupGuardAllowedOn(top_level);
   }
+  // Not ad blocking, so whatever the switch and the trusted sites say.
+  resources->best_video_quality = service && url.SchemeIsHTTPOrHTTPS() &&
+                                  service->BestVideoQualityEnabled();
   if (service && service->IsCosmeticFilteringEnabled() &&
       url.SchemeIsHTTPOrHTTPS() && !service->IsSiteTrusted(top_level)) {
     if (scoped_refptr<const EngineSet> engines = service->engines()) {

@@ -81,6 +81,14 @@ Everything is on by default, shows up in the protection log with the reason, and
 - The toolbar shield's pop-up shows the page's pop-ups stopped, downloads held and threats blocked.
 - Safe Browsing's warning pages are not in the log: `SafeBrowsingUIManager` has no observer to hear them from, and the page itself offers to continue.
 
+## Best video quality (158.0.8127.3)
+
+The setting "Play videos in the best quality" (pref `reba_adblock.best_video_quality`, **off** by default because a player left with only its best quality pauses to buffer on a slow connection instead of dropping lower). It is not ad blocking, so it applies whatever the main switch and the trusted sites say: `CosmeticFiltersImpl` sets `best_video_quality` for every web page, and `CosmeticObserver::InstallVideoQuality()` puts `video_quality.js` in the page's main world before its scripts, once per window, in every frame.
+
+`video_quality.js` wraps `fetch()` and the `XMLHttpRequest` response getters (`responseText`, `response` for text and arraybuffer, `responseXML`) and rewrites manifests: DASH (`.mpd`, `application/dash+xml`, or text that starts like an MPD) keeps in every video adaptation set only the best representation `MediaSource.isTypeSupported()` accepts (height, then frame rate, then bit rate); audio, trick-mode and dependent sets are left alone. HLS master playlists (`.m3u8`, `mpegurl`) keep the best variant per audio group and video codec, drop audio-only variants and keep everything else. Keeping a best per adaptation set matters for DRM: sites put SD, HD and full HD in sets with their own keys and only license some of them to a given CDM, and the player falls back to the set it got keys for. Responses rewritten through `fetch()` keep their `url` (players resolve segment addresses against it). Not reached: players that fetch the manifest in a worker (Twitch), and sites without manifests (YouTube).
+
+What it can't do: get more than the site licenses. REBA has Widevine L3 without Google's VMP signature, and discovery+ (WBD) refuses the 720p and 1080p keys to it (HTTP 400 from its license proxy), so there the best is 1024x576; without the setting the player often sits at 768x432 for minutes. The REBA filters list removes the 720p/1080p groups on discovery+, which saves the four refused license requests (about 7 s) at every start.
+
 ## Not done
 
 - `$csp` filters (they need the response headers of navigations).

@@ -166,6 +166,13 @@ class RebaAdblockService final
   bool download_guard_enabled() const { return download_guard_; }
   bool antivirus_check_enabled() const { return antivirus_check_; }
 
+  // --- Video ---
+
+  // Whether pages get their video manifests without the lower qualities, so
+  // players play the best one (see video_quality.js).
+  void SetBestVideoQuality(bool enabled);
+  bool BestVideoQualityEnabled() const;
+
   // Sites where the user turned one protection off.
   enum class Exception { kPopupGuard, kDownloadGuard };
   // Whether the pop-up guard / the download guard is off for the site of

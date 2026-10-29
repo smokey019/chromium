@@ -30,6 +30,9 @@ void RegisterLocalStatePrefs(PrefRegistrySimple* registry) {
   registry->RegisterBooleanPref(kDownloadGuard, true);
   registry->RegisterListPref(kDownloadGuardAllowedSites);
   registry->RegisterBooleanPref(kAntivirusCheck, true);
+  // Off: on a slow connection a player that has only its best quality pauses
+  // to buffer instead of dropping to a lower one.
+  registry->RegisterBooleanPref(kBestVideoQuality, false);
   registry->RegisterBooleanPref(kAutoUpdate, true);
   registry->RegisterDictionaryPref(kListStates);
   registry->RegisterIntegerPref(kTotalBlocked, 0);
