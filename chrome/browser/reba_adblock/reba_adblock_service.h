@@ -12,6 +12,7 @@
 #include <vector>
 
 #include "base/files/file_path.h"
+#include "base/files/important_file_writer.h"
 #include "base/memory/raw_ptr.h"
 #include "base/memory/ref_counted.h"
 #include "base/memory/weak_ptr.h"
@@ -24,6 +25,7 @@
 #include "components/reba_adblock/core/blocked_request_log.h"
 #include "components/reba_adblock/core/engine_set.h"
 #include "components/reba_adblock/core/filter_list_catalog.h"
+#include "components/reba_adblock/core/security_log.h"
 #include "services/network/public/cpp/shared_url_loader_factory.h"
 #include "url/gurl.h"
 
@@ -70,7 +72,9 @@ struct ListView {
 // The ad blocker: owns the compiled filter lists, keeps them up to date, and
 // answers "should this be blocked". There is one for the whole browser; use
 // Get(). Lives on the UI thread, except for engine compilation.
-class RebaAdblockService final : public FilterListManager::Delegate {
+class RebaAdblockService final
+    : public FilterListManager::Delegate,
+      private base::ImportantFileWriter::DataSerializer {
  public:
   // The running service, or null before startup and after shutdown.
   static RebaAdblockService* Get();
@@ -81,7 +85,7 @@ class RebaAdblockService final : public FilterListManager::Delegate {
       scoped_refptr<network::SharedURLLoaderFactory> url_loader_factory);
   RebaAdblockService(const RebaAdblockService&) = delete;
   RebaAdblockService& operator=(const RebaAdblockService&) = delete;
-  ~RebaAdblockService();
+  ~RebaAdblockService() override;
 
   // Loads what is on disk and starts downloading what is missing.
   void Start();
@@ -133,6 +137,7 @@ class RebaAdblockService final : public FilterListManager::Delegate {
   std::vector<BlockedRequest> GetBlockedRequests() const {
     return log_.Snapshot();
   }
+  // Clears the request log and the protection log.
   void ClearBlockedRequests();
   // Requests blocked since the browser was first run.
   int64_t total_blocked() const { return total_blocked_; }
@@ -151,6 +156,36 @@ class RebaAdblockService final : public FilterListManager::Delegate {
   // link or control for them, whatever the filter lists say.
   bool PopupGuardEnabled() const;
   bool AutoUpdate() const;
+
+  // --- Protection ---
+
+  // The download guard (see download_guard.h) and the antivirus check of
+  // files that pages fetch (see response_scanner.h).
+  void SetDownloadGuard(bool enabled);
+  void SetAntivirusCheck(bool enabled);
+  bool download_guard_enabled() const { return download_guard_; }
+  bool antivirus_check_enabled() const { return antivirus_check_; }
+
+  // Sites where the user turned one protection off.
+  enum class Exception { kPopupGuard, kDownloadGuard };
+  // Whether the pop-up guard / the download guard is off for the site of
+  // `page_url` (or a parent domain of it).
+  bool IsPopupGuardAllowedOn(const GURL& page_url) const;
+  bool IsDownloadGuardAllowedOn(const GURL& page_url) const;
+  std::vector<std::string> GetExceptionSites(Exception which) const;
+  // Returns false if `site` is not a host name.
+  bool AddExceptionSite(Exception which, const std::string& site);
+  void RemoveExceptionSite(Exception which, const std::string& site);
+
+  // The protection log: what the browser protected the user from in the last
+  // 30 days, kept on disk (`security_log.json` in the ad blocker's folder).
+  // Off the record an event is not logged.
+  void RecordSecurityEvent(SecurityEvent event, bool incognito);
+  std::vector<SecurityEvent> GetSecurityEvents() const {
+    return security_log_.Snapshot();
+  }
+  // Forgets the events last seen in [begin, end), for "Clear browsing data".
+  void ClearSecurityEventsBetween(base::Time begin, base::Time end);
 
   // Filter lists.
   std::vector<ListView> GetLists() const;
@@ -213,6 +248,9 @@ class RebaAdblockService final : public FilterListManager::Delegate {
   std::vector<FilterList> EnabledLists() const;
   std::vector<FilterList> CustomLists() const;
   void SaveEnabledLists(const std::set<std::string>& ids);
+  // Switches on, once, the default lists of kLaterDefaultLists for someone
+  // whose choice of lists was saved before those lists existed.
+  void AddLaterDefaultLists();
   // The text compiled into the user engine: My filters plus the rules of the
   // session.
   std::string UserEngineText() const;
@@ -243,6 +281,14 @@ class RebaAdblockService final : public FilterListManager::Delegate {
   void NotifyBlockedRequestsSoon();
   void FlushBlockedNotification();
   void SaveTotalBlocked();
+
+  // The protection log file.
+  void LoadSecurityLog();
+  void OnSecurityLogRead(std::optional<std::string> text);
+  void SaveSecurityLogSoon();
+  // base::ImportantFileWriter::DataSerializer:
+  std::optional<std::string> SerializeData() override;
+  const char* ExceptionPref(Exception which) const;
 
   const raw_ptr<PrefService> local_state_;
   const base::FilePath data_dir_;
@@ -282,6 +328,19 @@ class RebaAdblockService final : public FilterListManager::Delegate {
   // Rules added for the session: from the request log, the blocked page, or
   // off-the-record windows.
   std::vector<std::string> session_rules_;
+
+  bool download_guard_ = true;
+  bool antivirus_check_ = true;
+  std::set<std::string, std::less<>> popup_guard_allowed_sites_;
+  std::set<std::string, std::less<>> download_guard_allowed_sites_;
+
+  SecurityLog security_log_;
+  // Events that happened before the file was read, recorded once it is.
+  std::vector<std::pair<SecurityEvent, base::Time>> pending_security_events_;
+  bool security_log_loaded_ = false;
+  // Writes to security_log.json on a sequence that finishes before shutdown.
+  scoped_refptr<base::SequencedTaskRunner> security_log_task_runner_;
+  std::unique_ptr<base::ImportantFileWriter> security_log_writer_;
 
   BlockedRequestLog log_;
   int64_t total_blocked_ = 0;

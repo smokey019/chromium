@@ -52,6 +52,7 @@
 #include "chrome/browser/platform_util.h"
 #include "chrome/browser/policy/chrome_policy_blocklist_service_factory.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/reba_adblock/download_guard.h"
 #include "chrome/browser/tab_group_sync/tab_group_sync_tab_state.h"
 #include "chrome/browser/ui/chrome_pages.h"
 #include "chrome/browser/ui/scoped_tabbed_browser_displayer.h"
@@ -736,6 +737,10 @@ void ChromeDownloadManagerDelegate::SetDownloadManager(DownloadManager* dm) {
   }
 
   download_manager_ = dm;
+  // REBA: log antivirus and Safe Browsing verdicts in the protection log.
+  reba_download_observer_ =
+      dm ? std::make_unique<reba_adblock::DownloadProtectionObserver>(dm)
+         : nullptr;
 
   // This is only for Incident Reporting, which does not report on downloads on
   // Android.

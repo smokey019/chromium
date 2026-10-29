@@ -20,6 +20,10 @@ inline constexpr char kCosmeticFilteringEnabled[] =
     "reba_adblock.cosmetic_filtering_enabled";
 // list of strings. Ids of the enabled filter lists.
 inline constexpr char kEnabledLists[] = "reba_adblock.enabled_lists";
+// list of strings. Default lists added in a later version that have been
+// switched on once for people who had already chosen their lists.
+inline constexpr char kLaterDefaultListsAdded[] =
+    "reba_adblock.later_default_lists_added";
 // list of dicts {"url": string, "title": string}. Lists added by URL.
 inline constexpr char kCustomLists[] = "reba_adblock.custom_lists";
 // string. The user's own filters ("My filters").
@@ -37,6 +41,19 @@ inline constexpr char kContextMenuEnabled[] =
 // a link or control for them ("click hijacking"), even if no filter list knows
 // the address.
 inline constexpr char kPopupGuard[] = "reba_adblock.popup_guard";
+// list of strings. Hosts (and their subdomains) where the pop-up guard is off.
+inline constexpr char kPopupGuardAllowedSites[] =
+    "reba_adblock.popup_guard_allowed_sites";
+// bool. Hold programs, scripts and archives that a page starts downloading
+// without a click, from another site's frame, or in a pop-up of another site,
+// for the user to keep or delete.
+inline constexpr char kDownloadGuard[] = "reba_adblock.download_guard";
+// list of strings. Hosts (and their subdomains) where downloads are not held.
+inline constexpr char kDownloadGuardAllowedSites[] =
+    "reba_adblock.download_guard_allowed_sites";
+// bool. Hand programs, installers and archives that pages fetch to Windows'
+// antivirus before the page gets them.
+inline constexpr char kAntivirusCheck[] = "reba_adblock.antivirus_check";
 // bool. Download new versions of the filter lists on their own.
 inline constexpr char kAutoUpdate[] = "reba_adblock.auto_update";
 // dict: list id -> dict with "updated" (double, seconds since the epoch),

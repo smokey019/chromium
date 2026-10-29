@@ -36,6 +36,11 @@ export class SettingsAdblockSitesTabElement extends CrLitElement {
         .add-form cr-button {
           margin-top: 10px;
         }
+        .section-title {
+          font-size: 13px;
+          font-weight: 500;
+          margin: 24px 0 4px;
+        }
       `,
     ];
   }

@@ -19,6 +19,19 @@ function render(next) {
   $('pageCount').textContent = state.blockedCount.toLocaleString();
   $('hiddenCount').textContent = state.hiddenCount.toLocaleString();
   $('totalCount').textContent = state.totalBlocked.toLocaleString();
+
+  // What the other protections did on this page.
+  const done = [];
+  const say = (n, one, many) => {
+    if (n > 0) {
+      done.push(`${n.toLocaleString()} ${n === 1 ? one : many}`);
+    }
+  };
+  say(state.popupsStopped, 'pop-up stopped', 'pop-ups stopped');
+  say(state.downloadsHeld, 'download held', 'downloads held');
+  say(state.threatsBlocked, 'threat blocked', 'threats blocked');
+  $('protection').hidden = done.length === 0;
+  $('protectionText').textContent = done.join(' · ');
   $('globalEnabled').checked = state.enabled;
 
   const active = state.enabled && hasSite && !state.siteTrusted;

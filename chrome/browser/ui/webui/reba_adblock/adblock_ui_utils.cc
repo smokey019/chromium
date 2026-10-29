@@ -34,6 +34,7 @@ base::ListValue BlockedRequestsToList(
   base::ListValue list;
   for (const BlockedRequest& request : requests) {
     base::DictValue dict;
+    dict.Set("kind", "ads");
     dict.Set("url", request.url);
     dict.Set("type", request.type);
     dict.Set("pageHost", request.page_host);
@@ -41,6 +42,30 @@ base::ListValue BlockedRequestsToList(
     dict.Set("list", request.list_title);
     dict.Set("count", request.count);
     dict.Set("time", request.last_blocked.InMillisecondsFSinceUnixEpoch());
+    list.Append(std::move(dict));
+  }
+  return list;
+}
+
+base::ListValue SecurityEventsToList(const std::vector<SecurityEvent>& events) {
+  base::ListValue list;
+  for (const SecurityEvent& event : events) {
+    base::DictValue dict;
+    dict.Set("kind", SecurityEventKindName(event.kind));
+    dict.Set("url", event.url);
+    dict.Set("file", event.file_name);
+    dict.Set("pageHost", event.page_host);
+    dict.Set("reason", event.reason);
+    dict.Set("detail", event.detail);
+    // Pop-ups say which list (or the pop-up guard) refused them, like
+    // blocked requests do.
+    dict.Set("list", event.kind == SecurityEventKind::kPopup ? event.detail
+                                                             : std::string());
+    dict.Set("filter", std::string());
+    dict.Set("type", std::string());
+    dict.Set("count", event.count);
+    dict.Set("time", event.last_seen.InMillisecondsFSinceUnixEpoch());
+    dict.Set("first", event.first_seen.InMillisecondsFSinceUnixEpoch());
     list.Append(std::move(dict));
   }
   return list;
@@ -54,6 +79,19 @@ base::DictValue BuildSettingsState(RebaAdblockService& service) {
   state.Set("showBlockedCount", service.ShowBlockedCount());
   state.Set("contextMenu", service.ContextMenuEnabled());
   state.Set("popupGuard", service.PopupGuardEnabled());
+  state.Set("downloadGuard", service.download_guard_enabled());
+  state.Set("antivirus", service.antivirus_check_enabled());
+  for (auto [key, which] :
+       {std::pair("popupGuardAllowedSites",
+                  RebaAdblockService::Exception::kPopupGuard),
+        std::pair("downloadGuardAllowedSites",
+                  RebaAdblockService::Exception::kDownloadGuard)}) {
+    base::ListValue sites;
+    for (const std::string& site : service.GetExceptionSites(which)) {
+      sites.Append(site);
+    }
+    state.Set(key, std::move(sites));
+  }
   state.Set("totalBlocked", static_cast<double>(service.total_blocked()));
   state.Set("updating", service.IsUpdatingLists());
   state.Set("ready", !!service.engines());

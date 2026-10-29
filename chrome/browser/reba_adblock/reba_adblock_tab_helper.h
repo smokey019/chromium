@@ -5,6 +5,7 @@
 #ifndef CHROME_BROWSER_REBA_ADBLOCK_REBA_ADBLOCK_TAB_HELPER_H_
 #define CHROME_BROWSER_REBA_ADBLOCK_REBA_ADBLOCK_TAB_HELPER_H_
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -16,6 +17,7 @@
 #include "content/public/browser/web_contents_observer.h"
 #include "content/public/browser/web_contents_user_data.h"
 #include "url/gurl.h"
+#include "url/origin.h"
 
 namespace reba_adblock {
 
@@ -48,8 +50,19 @@ class RebaAdblockTabHelper
                         RequestType type,
                         const Decision& decision);
 
-  // Requests blocked since the page started loading.
+  // Requests blocked since the page started loading (pop-ups not included).
   int blocked_count() const { return blocked_count_; }
+  // What the other protections did on the page: pop-ups refused, downloads
+  // held, threats the antivirus found.
+  int popups_stopped() const { return popups_stopped_; }
+  int downloads_held() const { return downloads_held_; }
+  int threats_blocked() const { return threats_blocked_; }
+  void OnDownloadHeld();
+  void OnThreatBlocked();
+
+  // The origin of the page that opened this tab (window.open, a link with a
+  // target), if a page did.
+  const std::optional<url::Origin>& opened_by() const { return opened_by_; }
   // The most recent ones.
   const std::vector<BlockedItem>& blocked_items() const {
     return blocked_items_;
@@ -81,6 +94,14 @@ class RebaAdblockTabHelper
 
   // content::WebContentsObserver:
   void DidFinishNavigation(content::NavigationHandle* handle) override;
+  void DidOpenRequestedURL(content::WebContents* new_contents,
+                           content::RenderFrameHost* source_render_frame_host,
+                           const GURL& url,
+                           const content::Referrer& referrer,
+                           WindowOpenDisposition disposition,
+                           ui::PageTransition transition,
+                           bool started_from_context_menu,
+                           bool renderer_initiated) override;
 
  private:
   friend class content::WebContentsUserData<RebaAdblockTabHelper>;
@@ -90,6 +111,10 @@ class RebaAdblockTabHelper
 
   int blocked_count_ = 0;
   int hidden_element_count_ = 0;
+  int popups_stopped_ = 0;
+  int downloads_held_ = 0;
+  int threats_blocked_ = 0;
+  std::optional<url::Origin> opened_by_;
   // When the element picker was started; null when it isn't running.
   base::TimeTicks picker_started_;
   std::vector<BlockedItem> blocked_items_;

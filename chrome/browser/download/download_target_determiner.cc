@@ -27,6 +27,7 @@
 #include "chrome/browser/download/download_stats.h"
 #include "chrome/browser/history/history_service_factory.h"
 #include "chrome/browser/profiles/profile.h"
+#include "chrome/browser/reba_adblock/download_guard.h"
 #include "chrome/browser/safe_browsing/safe_browsing_metrics_collector_factory.h"
 #include "chrome/browser/supervised_user/supervised_user_url_filtering_service_factory.h"
 #include "chrome/common/pref_names.h"
@@ -1017,6 +1018,14 @@ DownloadTargetDeterminer::Result
 
   if (ShouldSuppressDangerousFileWarning()) {
     danger_level_ = DownloadFileType::NOT_DANGEROUS;
+    return CONTINUE;
+  }
+
+  // REBA: the download guard holds risky files that started without a click,
+  // from another site's frame or in a pop-up of another site.
+  if (reba_adblock::ShouldHoldDownload(download_, GetFileDisplayName())) {
+    danger_level_ = DownloadFileType::DANGEROUS;
+    danger_type_ = download::DOWNLOAD_DANGER_TYPE_DANGEROUS_FILE;
     return CONTINUE;
   }
 

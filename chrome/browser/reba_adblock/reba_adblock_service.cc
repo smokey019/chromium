@@ -9,7 +9,10 @@
 
 #include "base/check.h"
 #include "base/command_line.h"
+#include "base/files/file_util.h"
 #include "base/functional/bind.h"
+#include "base/json/json_reader.h"
+#include "base/json/json_writer.h"
 #include "base/strings/string_number_conversions.h"
 #include "base/task/sequenced_task_runner.h"
 #include "base/task/single_thread_task_runner.h"
@@ -43,6 +46,12 @@ constexpr base::TimeDelta kStartupUpdateDelay = base::Seconds(20);
 // only downloaded when it is due.
 constexpr base::TimeDelta kUpdateCheckPeriod = base::Minutes(30);
 
+// Default lists that came after the first release of the ad blocker. Someone
+// who had changed their choice of lists has a saved list of ids that a new
+// default doesn't join by itself, so each of these is switched on for them
+// once.
+constexpr const char* kLaterDefaultLists[] = {"reba-filters"};
+
 }  // namespace
 
 // static
@@ -63,9 +72,18 @@ RebaAdblockService::RebaAdblockService(
            base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN})),
       engine_task_runner_(base::ThreadPool::CreateUpdateableSequencedTaskRunner(
           {base::MayBlock(), base::TaskPriority::USER_BLOCKING,
-           base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN})) {
+           base::TaskShutdownBehavior::SKIP_ON_SHUTDOWN})),
+      // The last write of the protection log has to finish at shutdown. Not
+      // BEST_EFFORT, which waits for startup to end: the settings page and the
+      // events of the first minutes need the file read.
+      security_log_task_runner_(base::ThreadPool::CreateSequencedTaskRunner(
+          {base::MayBlock(), base::TaskPriority::USER_VISIBLE,
+           base::TaskShutdownBehavior::BLOCK_SHUTDOWN})) {
   CHECK(!g_instance);
   g_instance = this;
+  security_log_writer_ = std::make_unique<base::ImportantFileWriter>(
+      data_dir_.AppendASCII("security_log.json"), security_log_task_runner_,
+      base::Seconds(10));
 
   // For development: use a resources file made by tools/build_resources.mjs
   // as it is, unsigned. It is read where it is and never copied over the
@@ -95,17 +113,25 @@ RebaAdblockService::~RebaAdblockService() {
     observer.OnAdblockServiceShutdown();
   }
   SaveTotalBlocked();
+  if (security_log_writer_->HasPendingWrite()) {
+    security_log_writer_->DoScheduledWrite();
+  }
   CHECK_EQ(g_instance, this);
   g_instance = nullptr;
 }
 
 void RebaAdblockService::Start() {
+  // Before the pref observers, so that it isn't seen as a change.
+  AddLaterDefaultLists();
+  LoadSecurityLog();
   pref_registrar_.Init(local_state_);
   for (const char* pref :
        {prefs::kEnabled, prefs::kCosmeticFilteringEnabled, prefs::kEnabledLists,
         prefs::kCustomLists, prefs::kUserFilters, prefs::kTrustedSites,
         prefs::kShowBlockedCount, prefs::kContextMenuEnabled,
-        prefs::kPopupGuard, prefs::kAutoUpdate}) {
+        prefs::kPopupGuard, prefs::kAutoUpdate, prefs::kPopupGuardAllowedSites,
+        prefs::kDownloadGuard, prefs::kDownloadGuardAllowedSites,
+        prefs::kAntivirusCheck}) {
     pref_registrar_.Add(pref,
                         base::BindRepeating(&RebaAdblockService::OnPrefChanged,
                                             base::Unretained(this), pref));
@@ -197,6 +223,18 @@ void RebaAdblockService::RecordBlocked(const GURL& url,
                                        const Decision& decision,
                                        bool incognito) {
   ++total_blocked_;
+  if (type == RequestType::kPopup) {
+    // Pop-ups are few and worth keeping: the protection log.
+    SecurityEvent event;
+    event.kind = SecurityEventKind::kPopup;
+    event.url = url.spec();
+    event.page_host = page_url.host();
+    // The pop-up guard reports under its own name (CosmeticFiltersImpl).
+    event.reason = decision.list_title == "Pop-up guard" ? "guard" : "list";
+    event.detail = decision.list_title;
+    RecordSecurityEvent(std::move(event), incognito);
+    return;
+  }
   if (incognito) {
     return;
   }
@@ -213,6 +251,9 @@ void RebaAdblockService::RecordBlocked(const GURL& url,
 
 void RebaAdblockService::ClearBlockedRequests() {
   log_.Clear();
+  security_log_.Clear();
+  pending_security_events_.clear();
+  SaveSecurityLogSoon();
   for (RebaAdblockServiceObserver& observer : observers_) {
     observer.OnBlockedRequestsLogged();
   }
@@ -257,6 +298,19 @@ void RebaAdblockService::LoadSettings() {
   for (const base::Value& site : local_state_->GetList(prefs::kTrustedSites)) {
     if (site.is_string()) {
       trusted_sites_.insert(site.GetString());
+    }
+  }
+  download_guard_ = local_state_->GetBoolean(prefs::kDownloadGuard);
+  antivirus_check_ = local_state_->GetBoolean(prefs::kAntivirusCheck);
+  for (auto [which, sites] :
+       {std::pair(Exception::kPopupGuard, &popup_guard_allowed_sites_),
+        std::pair(Exception::kDownloadGuard, &download_guard_allowed_sites_)}) {
+    sites->clear();
+    for (const base::Value& site :
+         local_state_->GetList(ExceptionPref(which))) {
+      if (site.is_string()) {
+        sites->insert(site.GetString());
+      }
     }
   }
 }
@@ -321,6 +375,140 @@ bool RebaAdblockService::PopupGuardEnabled() const {
 
 bool RebaAdblockService::AutoUpdate() const {
   return local_state_->GetBoolean(prefs::kAutoUpdate);
+}
+
+// --- Protection ---
+
+void RebaAdblockService::SetDownloadGuard(bool enabled) {
+  local_state_->SetBoolean(prefs::kDownloadGuard, enabled);
+}
+
+void RebaAdblockService::SetAntivirusCheck(bool enabled) {
+  local_state_->SetBoolean(prefs::kAntivirusCheck, enabled);
+}
+
+const char* RebaAdblockService::ExceptionPref(Exception which) const {
+  return which == Exception::kPopupGuard ? prefs::kPopupGuardAllowedSites
+                                         : prefs::kDownloadGuardAllowedSites;
+}
+
+bool RebaAdblockService::IsPopupGuardAllowedOn(const GURL& page_url) const {
+  return HostMatchesSites(page_url.host(), popup_guard_allowed_sites_);
+}
+
+bool RebaAdblockService::IsDownloadGuardAllowedOn(const GURL& page_url) const {
+  return HostMatchesSites(page_url.host(), download_guard_allowed_sites_);
+}
+
+std::vector<std::string> RebaAdblockService::GetExceptionSites(
+    Exception which) const {
+  const auto& sites = which == Exception::kPopupGuard
+                          ? popup_guard_allowed_sites_
+                          : download_guard_allowed_sites_;
+  return std::vector<std::string>(sites.begin(), sites.end());
+}
+
+bool RebaAdblockService::AddExceptionSite(Exception which,
+                                          const std::string& site) {
+  const std::string host = NormalizeSiteEntry(site);
+  if (host.empty()) {
+    return false;
+  }
+  ScopedListPrefUpdate update(local_state_, ExceptionPref(which));
+  if (!std::ranges::contains(*update, base::Value(host))) {
+    update->Append(host);
+  }
+  return true;
+}
+
+void RebaAdblockService::RemoveExceptionSite(Exception which,
+                                             const std::string& site) {
+  ScopedListPrefUpdate update(local_state_, ExceptionPref(which));
+  update->EraseValue(base::Value(site));
+}
+
+void RebaAdblockService::RecordSecurityEvent(SecurityEvent event,
+                                             bool incognito) {
+  if (incognito) {
+    return;
+  }
+  const base::Time now = base::Time::Now();
+  if (!security_log_loaded_) {
+    pending_security_events_.emplace_back(std::move(event), now);
+    return;
+  }
+  security_log_.Record(std::move(event), now);
+  SaveSecurityLogSoon();
+  NotifyBlockedRequestsSoon();
+}
+
+void RebaAdblockService::ClearSecurityEventsBetween(base::Time begin,
+                                                    base::Time end) {
+  security_log_.ClearBetween(begin, end);
+  std::erase_if(pending_security_events_, [&](const auto& pending) {
+    return pending.second >= begin && pending.second < end;
+  });
+  SaveSecurityLogSoon();
+  for (RebaAdblockServiceObserver& observer : observers_) {
+    observer.OnBlockedRequestsLogged();
+  }
+}
+
+void RebaAdblockService::LoadSecurityLog() {
+  security_log_task_runner_->PostTaskAndReplyWithResult(
+      FROM_HERE,
+      base::BindOnce(
+          [](const base::FilePath& path) -> std::optional<std::string> {
+            std::string text;
+            if (!base::ReadFileToStringWithMaxSize(path, &text,
+                                                   8 * 1024 * 1024)) {
+              return std::nullopt;
+            }
+            return text;
+          },
+          security_log_writer_->path()),
+      base::BindOnce(&RebaAdblockService::OnSecurityLogRead,
+                     weak_factory_.GetWeakPtr()));
+}
+
+void RebaAdblockService::OnSecurityLogRead(std::optional<std::string> text) {
+  const base::Time now = base::Time::Now();
+  if (text) {
+    std::optional<base::Value> value =
+        base::JSONReader::Read(*text, base::JSON_PARSE_CHROMIUM_EXTENSIONS);
+    if (value && value->is_dict()) {
+      if (const base::ListValue* events = value->GetDict().FindList("events")) {
+        security_log_.LoadFromValue(*events, now);
+      }
+    }
+  }
+  security_log_loaded_ = true;
+  for (auto& [event, when] : pending_security_events_) {
+    security_log_.Record(std::move(event), when);
+  }
+  if (!pending_security_events_.empty()) {
+    pending_security_events_.clear();
+    SaveSecurityLogSoon();
+  }
+  NotifyBlockedRequestsSoon();
+}
+
+void RebaAdblockService::SaveSecurityLogSoon() {
+  if (security_log_loaded_) {
+    security_log_writer_->ScheduleWrite(this);
+  }
+}
+
+std::optional<std::string> RebaAdblockService::SerializeData() {
+  std::string json;
+  if (!base::JSONWriter::Write(
+          base::Value(base::DictValue()
+                          .Set("version", 1)
+                          .Set("events", security_log_.ToValue())),
+          &json)) {
+    return std::nullopt;
+  }
+  return json;
 }
 
 // --- Filter lists ---
@@ -389,6 +577,42 @@ std::vector<ListView> RebaAdblockService::GetLists() const {
     add(list);
   }
   return views;
+}
+
+void RebaAdblockService::AddLaterDefaultLists() {
+  std::set<std::string> added;
+  for (const base::Value& id :
+       local_state_->GetList(prefs::kLaterDefaultListsAdded)) {
+    if (id.is_string()) {
+      added.insert(id.GetString());
+    }
+  }
+  std::vector<std::string> fresh;
+  for (const char* id : kLaterDefaultLists) {
+    if (!added.contains(id) && FindBuiltinFilterList(id)) {
+      fresh.push_back(id);
+    }
+  }
+  if (fresh.empty()) {
+    return;
+  }
+  // Without a saved choice the default value, which has these lists, is used.
+  const PrefService::Preference* pref =
+      local_state_->FindPreference(prefs::kEnabledLists);
+  if (pref && !pref->IsDefaultValue()) {
+    std::set<std::string> enabled;
+    for (const base::Value& id : local_state_->GetList(prefs::kEnabledLists)) {
+      if (id.is_string()) {
+        enabled.insert(id.GetString());
+      }
+    }
+    enabled.insert(fresh.begin(), fresh.end());
+    SaveEnabledLists(enabled);
+  }
+  ScopedListPrefUpdate update(local_state_, prefs::kLaterDefaultListsAdded);
+  for (const std::string& id : fresh) {
+    update->Append(id);
+  }
 }
 
 void RebaAdblockService::SaveEnabledLists(const std::set<std::string>& ids) {

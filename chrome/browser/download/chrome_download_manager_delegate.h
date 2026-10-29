@@ -50,6 +50,10 @@
 #endif
 
 class DownloadPrefs;
+
+namespace reba_adblock {
+class DownloadProtectionObserver;
+}  // namespace reba_adblock
 class Profile;
 
 namespace content {
@@ -450,6 +454,9 @@ class ChromeDownloadManagerDelegate
   // database.
   IdCallbackVector id_callbacks_;
   std::unique_ptr<DownloadPrefs> download_prefs_;
+  // REBA: logs antivirus and Safe Browsing verdicts in the protection log.
+  std::unique_ptr<reba_adblock::DownloadProtectionObserver>
+      reba_download_observer_;
 
 #if BUILDFLAG(ENABLE_EXTENSIONS_CORE)
   // CRX installs that are currently in progress.
