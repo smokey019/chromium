@@ -64,6 +64,8 @@ class CosmeticObserver
   bool ClaimWindow(v8::Global<v8::Context>& slot);
   // Puts the pop-up guard in the page. Returns false if the frame is gone.
   bool InstallPopupGuard();
+  // Puts video_quality.js in the page. Returns false if the frame is gone.
+  bool InstallVideoQuality();
 
   // The native function the isolated world's scripts call, see
   // cosmetic_filters.js.
@@ -100,9 +102,11 @@ class CosmeticObserver
   // The element picker's preview.
   blink::WebString preview_sheet_key_;
 
-  // The main worlds the scriptlets and the pop-up guard last ran in. Weak.
+  // The main worlds the scriptlets, the pop-up guard and video_quality.js last
+  // ran in. Weak.
   v8::Global<v8::Context> scriptlet_context_;
   v8::Global<v8::Context> guard_context_;
+  v8::Global<v8::Context> video_quality_context_;
   // Names the event and attribute with which the guard in the page tells the
   // isolated world about a refused pop-up. Random, so the page can't forge
   // reports. Set with `guard_context_`.

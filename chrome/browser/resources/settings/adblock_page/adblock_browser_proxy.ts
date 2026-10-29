@@ -42,6 +42,7 @@ export interface AdblockState {
   popupGuard: boolean;
   downloadGuard: boolean;
   antivirus: boolean;
+  bestVideoQuality: boolean;
   // Sites where the pop-up guard / the download guard is off.
   popupGuardAllowedSites: string[];
   downloadGuardAllowedSites: string[];
@@ -82,7 +83,7 @@ export interface BlockedRequestInfo {
 export const MAX_USER_FILTERS_BYTES = 1024 * 1024;
 
 export type BoolSetting = 'enabled'|'cosmetic'|'autoUpdate'|'showBlockedCount'|
-    'contextMenu'|'popupGuard'|'downloadGuard'|'antivirus';
+    'contextMenu'|'popupGuard'|'downloadGuard'|'antivirus'|'bestVideoQuality';
 
 export type LogAction = 'allowAlways'|'allowOnSite'|'allowSession'|
     'blockAlways'|'allowPopupsOnSite'|'stopHoldingOnSite';

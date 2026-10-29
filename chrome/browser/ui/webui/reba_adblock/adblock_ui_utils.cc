@@ -81,6 +81,7 @@ base::DictValue BuildSettingsState(RebaAdblockService& service) {
   state.Set("popupGuard", service.PopupGuardEnabled());
   state.Set("downloadGuard", service.download_guard_enabled());
   state.Set("antivirus", service.antivirus_check_enabled());
+  state.Set("bestVideoQuality", service.BestVideoQualityEnabled());
   for (auto [key, which] :
        {std::pair("popupGuardAllowedSites",
                   RebaAdblockService::Exception::kPopupGuard),
