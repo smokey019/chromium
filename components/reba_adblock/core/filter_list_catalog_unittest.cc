@@ -34,12 +34,20 @@ TEST(FilterListCatalogTest, BuiltinListsAreSane) {
   }
 }
 
-TEST(FilterListCatalogTest, DefaultsAreUBlockOriginsDefaults) {
+TEST(FilterListCatalogTest, DefaultsAreUBlockOriginsDefaultsPlusOurs) {
   EXPECT_THAT(DefaultEnabledListIds(),
-              UnorderedElementsAre("ublock-filters", "ublock-badware",
-                                   "ublock-privacy", "ublock-unbreak",
-                                   "ublock-quick-fixes", "easylist",
-                                   "easyprivacy", "urlhaus-1", "plowe-0"));
+              UnorderedElementsAre(
+                  "reba-filters", "ublock-filters", "ublock-badware",
+                  "ublock-privacy", "ublock-unbreak", "ublock-quick-fixes",
+                  "easylist", "easyprivacy", "urlhaus-1", "plowe-0"));
+}
+
+TEST(FilterListCatalogTest, RebaFiltersComeFirstAndAreNotTrusted) {
+  const std::vector<FilterList>& lists = BuiltinFilterLists();
+  ASSERT_FALSE(lists.empty());
+  EXPECT_EQ("reba-filters", lists.front().id);
+  EXPECT_FALSE(lists.front().trusted);
+  EXPECT_EQ("default", lists.front().group);
 }
 
 TEST(FilterListCatalogTest, TrustedLists) {
@@ -110,7 +118,8 @@ TEST(FilterListCatalogTest, UpdateIntervalIsClamped) {
 }
 
 TEST(FilterListCatalogTest, NoMetadataInFilterLines) {
-  FilterListMetadata m = ParseFilterListMetadata("||ads.test^\n! Title: late\n");
+  FilterListMetadata m =
+      ParseFilterListMetadata("||ads.test^\n! Title: late\n");
   EXPECT_TRUE(m.title.empty());
   EXPECT_THAT(m.redirect, IsEmpty());
 }

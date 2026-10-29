@@ -10,7 +10,7 @@ import {WebUiListenerMixinLit} from 'chrome://resources/cr_elements/web_ui_liste
 import type {CSSResultGroup, PropertyValues} from 'chrome://resources/lit/v3_0/lit.rollup.js';
 import {CrLitElement, css} from 'chrome://resources/lit/v3_0/lit.rollup.js';
 
-import type {BlockedRequestInfo, LogAction} from './adblock_browser_proxy.js';
+import type {BlockedRequestInfo, LogAction, LogKind} from './adblock_browser_proxy.js';
 import {AdblockBrowserProxyImpl} from './adblock_browser_proxy.js';
 import {getHtml} from './adblock_log_tab.html.js';
 import {adblockSharedStyles} from './adblock_shared_styles.js';
@@ -20,8 +20,9 @@ export type SortBy = 'recent'|'count';
 const SettingsAdblockLogTabElementBase = WebUiListenerMixinLit(CrLitElement);
 
 /**
- * The "Blocked requests" tab: the URLs the ad blocker blocked most recently
- * (at most 500), which list and filter blocked each, and how often.
+ * The protection log tab: the requests the ad blocker blocked most recently
+ * (at most 500, in memory), and the pop-ups, downloads and threats of the last
+ * 30 days (kept on disk by the browser), with why and what to do about each.
  */
 export class SettingsAdblockLogTabElement extends
     SettingsAdblockLogTabElementBase {
@@ -101,6 +102,36 @@ export class SettingsAdblockLogTabElement extends
         .search {
           max-width: 320px;
         }
+        .kind-filter {
+          background: transparent;
+          border: var(--cr-separator-line);
+          border-radius: 4px;
+          color: inherit;
+          font: inherit;
+          padding: 4px 6px;
+        }
+        .kind {
+          border-radius: 4px;
+          font-size: 11px;
+          font-weight: 500;
+          margin-inline-end: 6px;
+          padding: 1px 6px;
+        }
+        .kind-popup {
+          background: color-mix(in srgb, var(--google-blue-500, #1a73e8) 18%,
+              transparent);
+        }
+        .kind-download {
+          background: color-mix(in srgb, var(--google-yellow-500, #f9ab00) 25%,
+              transparent);
+        }
+        .kind-antivirus, .kind-safebrowsing {
+          background: color-mix(in srgb, var(--google-red-500, #d93025) 22%,
+              transparent);
+        }
+        .note {
+          color: var(--cr-secondary-text-color);
+        }
         @media (max-width: 760px) {
           .head, .item-summary {
             grid-template-columns: minmax(0, 1fr) 48px 84px;
@@ -124,6 +155,7 @@ export class SettingsAdblockLogTabElement extends
       query_: {type: String, state: true},
       sortBy_: {type: String, state: true},
       expanded_: {type: String, state: true},
+      kind_: {type: String, state: true},
     };
   }
 
@@ -133,6 +165,8 @@ export class SettingsAdblockLogTabElement extends
   protected accessor query_: string = '';
   protected accessor sortBy_: SortBy = 'recent';
   protected accessor expanded_: string = '';
+  // The kind of entries shown; empty for all.
+  protected accessor kind_: LogKind|'' = '';
 
   private proxy_ = AdblockBrowserProxyImpl.getInstance();
   private refreshTimer_: number|null = null;
@@ -179,17 +213,112 @@ export class SettingsAdblockLogTabElement extends
 
   protected visibleItems_(): BlockedRequestInfo[] {
     let items = this.items_;
+    if (this.kind_) {
+      items = items.filter(i => i.kind === this.kind_);
+    }
     if (this.query_) {
       items = items.filter(
-          i => `${i.url} ${i.list} ${i.filter} ${i.pageHost} ${i.type}`
+          i => `${i.url} ${i.file || ''} ${i.list} ${i.filter} ${i.pageHost} ${
+                   i.type} ${this.reasonText_(i)}`
                    .toLowerCase()
                    .includes(this.query_));
     }
+    // The two logs come one after the other; most recent first, and for
+    // "Times" equal counts stay in order of recency (the sort is stable).
+    items = [...items].sort((a, b) => b.time - a.time);
     if (this.sortBy_ === 'count') {
-      // Stable: equal counts stay in order of recency.
-      items = [...items].sort((a, b) => b.count - a.count);
+      items.sort((a, b) => b.count - a.count);
     }
     return items;
+  }
+
+  protected keyOf_(item: BlockedRequestInfo): string {
+    return `${item.kind}|${item.url}|${item.pageHost}`;
+  }
+
+  protected kindLabel_(kind: LogKind): string {
+    switch (kind) {
+      case 'popup':
+        return 'Pop-up';
+      case 'download':
+        return 'Download';
+      case 'antivirus':
+        return 'Antivirus';
+      case 'safebrowsing':
+        return 'Safe Browsing';
+      default:
+        return 'Request';
+    }
+  }
+
+  protected reasonText_(item: BlockedRequestInfo): string {
+    switch (item.kind) {
+      case 'popup':
+        return item.reason === 'guard' ?
+            'Pop-up guard: opened by a click that was not on a link for it' :
+            `Filter list: ${item.list || 'unknown'}`;
+      case 'download':
+        switch (item.reason) {
+          case 'no-click':
+            return 'Held: started without a click';
+          case 'other-site-frame':
+            return 'Held: started by another site on the page (an ad)';
+          case 'popup-tab':
+            return 'Held: started in a pop-up another site opened';
+          case 'file-type':
+            return 'Held: a program from a site you have not visited before';
+          default:
+            return 'Held';
+        }
+      case 'antivirus':
+        switch (item.reason) {
+          case 'download':
+            return 'Windows antivirus blocked the download';
+          case 'too-large':
+            return 'Blocked: too large to check (over 64 MB)';
+          default:
+            return 'Windows antivirus found a threat';
+        }
+      case 'safebrowsing':
+        switch (item.detail) {
+          case 'dangerous-url':
+          case 'dangerous-host':
+            return 'Safe Browsing: from a dangerous site';
+          case 'dangerous-content':
+            return 'Safe Browsing: known malware';
+          case 'unwanted':
+            return 'Safe Browsing: unwanted software';
+          case 'uncommon':
+            return 'Safe Browsing: rarely downloaded file';
+          default:
+            return 'Safe Browsing warning';
+        }
+      default:
+        return item.list || '—';
+    }
+  }
+
+  protected noteText_(item: BlockedRequestInfo): string {
+    if (item.kind === 'safebrowsing') {
+      return 'The downloads page lets you keep the file if you are sure it ' +
+          'is safe.';
+    }
+    if (item.reason === 'too-large') {
+      return 'Files this large that a page fetches in pieces cannot be ' +
+          'checked, so they are blocked. Downloading the file normally still ' +
+          'works.';
+    }
+    return 'Windows antivirus found a threat in this file, so it never ' +
+        'reached the page or the disk. This cannot be overridden; if you are ' +
+        'sure it is a mistake, report it to Microsoft.';
+  }
+
+  protected onKindChange_(e: Event) {
+    this.kind_ = (e.target as HTMLSelectElement).value as LogKind | '';
+  }
+
+  protected onOpenDownloads_() {
+    window.open('chrome://downloads');
   }
 
   protected onClear_() {
@@ -202,8 +331,8 @@ export class SettingsAdblockLogTabElement extends
     this.proxy_.logAction(action, item.url, item.pageHost);
   }
 
-  protected toggleExpanded_(url: string) {
-    this.expanded_ = this.expanded_ === url ? '' : url;
+  protected toggleExpanded_(key: string) {
+    this.expanded_ = this.expanded_ === key ? '' : key;
   }
 
   protected setSort_(sortBy: SortBy) {

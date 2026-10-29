@@ -14,8 +14,10 @@
 void QuietNotificationPermissionUiState::RegisterProfilePrefs(
     user_prefs::PrefRegistrySyncable* registry) {
   // TODO(crbug.com/40097905): Consider making this syncable.
+  // REBA: on by default. Scam pages ask for notifications to spam people;
+  // a site the user wants can still be allowed from the address bar.
   registry->RegisterBooleanPref(prefs::kEnableQuietNotificationPermissionUi,
-                                /*default_value=*/false);
+                                /*default_value=*/true);
   registry->RegisterBooleanPref(prefs::kEnableQuietGeolocationPermissionUi,
                                 /*default_value=*/false);
   registry->RegisterBooleanPref(

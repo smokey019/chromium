@@ -117,6 +117,39 @@ const scoped_refptr<base::SingleThreadTaskRunner>& TaskRunner(
   return base::SingleThreadTaskRunner::GetCurrentDefault();
 }
 
+// REBA: programs, installers and archives are not stored in the cache. A
+// malicious one in the cache folder gets the antivirus to quarantine it and
+// blame the browser for having written it, and they are rarely fetched twice.
+bool IsProgramOrArchive(const HttpResponseHeaders& headers) {
+  std::string mime_type;
+  headers.GetMimeType(&mime_type);
+  mime_type = base::ToLowerASCII(mime_type);
+  static constexpr std::string_view kTypes[] = {
+      "application/vnd.microsoft.portable-executable",
+      "application/vnd.ms-cab-compressed",
+      "application/vnd.rar",
+      "application/x-7z-compressed",
+      "application/x-dosexec",
+      "application/x-ms-installer",
+      "application/x-msdos-program",
+      "application/x-msdownload",
+      "application/x-msi",
+      "application/x-rar-compressed",
+      "application/x-zip-compressed",
+      "application/zip",
+  };
+  for (std::string_view type : kTypes) {
+    if (mime_type == type) {
+      return true;
+    }
+  }
+  // A file the server wants saved, of no particular type.
+  const std::string disposition = base::ToLowerASCII(
+      headers.GetNormalizedHeader("Content-Disposition").value_or(""));
+  return disposition.starts_with("attachment") &&
+         (mime_type.empty() || mime_type == "application/octet-stream");
+}
+
 }  // namespace
 
 #define CACHE_STATUS_HISTOGRAMS(type)                                      \
@@ -4389,6 +4422,9 @@ void HttpCache::Transaction::TransitionToState(State state) {
 
 bool HttpCache::Transaction::UpdateAndReportCacheability(
     const HttpResponseHeaders& headers) {
+  if (IsProgramOrArchive(headers)) {
+    return true;
+  }
   // Do not cache no-store content.
   if (headers.HasHeaderValue("cache-control", "no-store")) {
     if (base::FeatureList::IsEnabled(features::kAvoidEntryCreationForNoStore)) {

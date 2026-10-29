@@ -7,8 +7,11 @@ static_library("reba_adblock") {
   sources = [
     "adblock_url_loader_factory.cc",
     "adblock_url_loader_factory.h",
+    "antivirus_scanner.h",
     "cosmetic_filters_impl.cc",
     "cosmetic_filters_impl.h",
+    "download_guard.cc",
+    "download_guard.h",
     "engine_builder.cc",
     "engine_builder.h",
     "filter_list_manager.cc",
@@ -31,7 +34,17 @@ static_library("reba_adblock") {
     "reba_adblock_websocket.h",
     "resources_manager.cc",
     "resources_manager.h",
+    "response_scanner.cc",
+    "response_scanner.h",
   ]
+  if (is_win) {
+    sources += [ "antivirus_scanner_win.cc" ]
+
+    # AMSI, the Antimalware Scan Interface.
+    libs = [ "amsi.lib" ]
+  } else {
+    sources += [ "antivirus_scanner_other.cc" ]
+  }
   public_deps = [
     "//base",
     "//components/reba_adblock/common:mojom",
@@ -43,11 +56,15 @@ static_library("reba_adblock") {
   deps = [
     "//chrome/common",
     "//components/blocked_content",
+    "//components/download/content/public",
+    "//components/download/public/common:public",
     "//components/prefs",
     "//crypto",
-    "//third_party/blink/public/common",
     "//mojo/public/cpp/bindings",
+    "//mojo/public/cpp/system",
     "//net",
     "//services/network/public/mojom",
+    "//third_party/blink/public/common",
+    "//ui/base",
   ]
 }

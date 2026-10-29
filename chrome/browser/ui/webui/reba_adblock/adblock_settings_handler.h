@@ -49,6 +49,8 @@ class AdblockSettingsHandler : public content::WebUIMessageHandler,
   void HandleGetLog(const base::ListValue& args);
   void HandleClearLog(const base::ListValue& args);
   void HandleLogAction(const base::ListValue& args);
+  void HandleAddExceptionSite(const base::ListValue& args);
+  void HandleRemoveExceptionSite(const base::ListValue& args);
 
   // Tells the page that the state changed, soon (many changes come in bursts).
   void NotifyStateChangedSoon();

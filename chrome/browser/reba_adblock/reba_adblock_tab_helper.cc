@@ -45,7 +45,11 @@ RebaAdblockTabHelper::~RebaAdblockTabHelper() {
 void RebaAdblockTabHelper::OnRequestBlocked(const GURL& url,
                                             RequestType type,
                                             const Decision& decision) {
-  ++blocked_count_;
+  if (type == RequestType::kPopup) {
+    ++popups_stopped_;
+  } else {
+    ++blocked_count_;
+  }
   if (blocked_items_.size() >= kMaxBlockedItems) {
     blocked_items_.erase(blocked_items_.begin());
   }
@@ -54,6 +58,37 @@ void RebaAdblockTabHelper::OnRequestBlocked(const GURL& url,
                             .filter = decision.filter,
                             .list_title = decision.list_title});
   NotifyObservers();
+}
+
+void RebaAdblockTabHelper::OnDownloadHeld() {
+  ++downloads_held_;
+  NotifyObservers();
+}
+
+void RebaAdblockTabHelper::OnThreatBlocked() {
+  ++threats_blocked_;
+  NotifyObservers();
+}
+
+void RebaAdblockTabHelper::DidOpenRequestedURL(
+    content::WebContents* new_contents,
+    content::RenderFrameHost* source_render_frame_host,
+    const GURL& url,
+    const content::Referrer& referrer,
+    WindowOpenDisposition disposition,
+    ui::PageTransition transition,
+    bool started_from_context_menu,
+    bool renderer_initiated) {
+  if (!new_contents || new_contents == web_contents() || !renderer_initiated ||
+      started_from_context_menu || !source_render_frame_host) {
+    return;
+  }
+  // The download guard asks whether a download in a pop-up comes from
+  // another site than the page that opened it.
+  RebaAdblockTabHelper::CreateForWebContents(new_contents);
+  RebaAdblockTabHelper::FromWebContents(new_contents)->opened_by_ =
+      source_render_frame_host->GetOutermostMainFrame()
+          ->GetLastCommittedOrigin();
 }
 
 void RebaAdblockTabHelper::AddHiddenElements(int count) {
@@ -69,6 +104,9 @@ void RebaAdblockTabHelper::DidFinishNavigation(
   }
   blocked_count_ = 0;
   hidden_element_count_ = 0;
+  popups_stopped_ = 0;
+  downloads_held_ = 0;
+  threats_blocked_ = 0;
   blocked_items_.clear();
   EndPicker();
   NotifyObservers();

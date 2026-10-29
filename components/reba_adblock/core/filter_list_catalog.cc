@@ -32,6 +32,25 @@ struct BuiltinEntry {
   bool default_enabled;
 };
 
+// REBA's own list, for ad networks and sites the other lists miss. It lives in
+// the release bucket so that rules can be added without a browser release
+// (reba-infra, tools/publish-filters.ts). Not trusted: it gets the same
+// scriptlets as EasyList.
+const BuiltinEntry kRebaEntries[] = {
+    {.id = "reba-filters",
+     .title = "REBA filters",
+     .group = "default",
+     .group2 = "",
+     .parent = "",
+     .urls = {"https://reba-releases.nyc3.cdn.digitaloceanspaces.com/adblock/"
+              "reba-filters.txt",
+              "https://reba-releases.nyc3.digitaloceanspaces.com/adblock/"
+              "reba-filters.txt"},
+     .support_url = "https://reba.smokey.gg/",
+     .lang = "",
+     .default_enabled = true},
+};
+
 // Generated; see the header of the file.
 const BuiltinEntry kBuiltinEntries[] = {
 #include "components/reba_adblock/core/filter_list_catalog_data.inc"
@@ -55,7 +74,15 @@ FilterListMetadata::~FilterListMetadata() = default;
 const std::vector<FilterList>& BuiltinFilterLists() {
   static const base::NoDestructor<std::vector<FilterList>> lists([] {
     std::vector<FilterList> lists;
+    std::vector<const BuiltinEntry*> entries;
+    for (const BuiltinEntry& entry : kRebaEntries) {
+      entries.push_back(&entry);
+    }
     for (const BuiltinEntry& entry : kBuiltinEntries) {
+      entries.push_back(&entry);
+    }
+    for (const BuiltinEntry* entry_ptr : entries) {
+      const BuiltinEntry& entry = *entry_ptr;
       FilterList list;
       list.id = entry.id;
       list.title = entry.title;
@@ -109,9 +136,8 @@ bool LooksLikeHostsFile(std::string_view text) {
   int hosts_lines = 0;
   int other_lines = 0;
   int examined = 0;
-  for (std::string_view line :
-       base::SplitStringPiece(text, "\n", base::TRIM_WHITESPACE,
-                              base::SPLIT_WANT_NONEMPTY)) {
+  for (std::string_view line : base::SplitStringPiece(
+           text, "\n", base::TRIM_WHITESPACE, base::SPLIT_WANT_NONEMPTY)) {
     if (line.starts_with('#') || line.starts_with('!') ||
         line.starts_with('[')) {
       continue;

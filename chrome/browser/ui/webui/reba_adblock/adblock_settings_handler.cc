@@ -4,6 +4,7 @@
 
 #include "chrome/browser/ui/webui/reba_adblock/adblock_settings_handler.h"
 
+#include <optional>
 #include <string>
 #include <utility>
 
@@ -50,6 +51,10 @@ void AdblockSettingsHandler::RegisterMessages() {
       {"rebaAdblockGetLog", &AdblockSettingsHandler::HandleGetLog},
       {"rebaAdblockClearLog", &AdblockSettingsHandler::HandleClearLog},
       {"rebaAdblockLogAction", &AdblockSettingsHandler::HandleLogAction},
+      {"rebaAdblockAddExceptionSite",
+       &AdblockSettingsHandler::HandleAddExceptionSite},
+      {"rebaAdblockRemoveExceptionSite",
+       &AdblockSettingsHandler::HandleRemoveExceptionSite},
   };
   for (const Message& message : kMessages) {
     web_ui()->RegisterMessageCallback(
@@ -83,8 +88,9 @@ void AdblockSettingsHandler::OnSettingsChanged() {
 
 void AdblockSettingsHandler::OnBlockedRequestsLogged() {
   if (RebaAdblockService* service = Service()) {
-    FireWebUIListener("reba-adblock-log-changed",
-                      base::Value(static_cast<double>(service->total_blocked())));
+    FireWebUIListener(
+        "reba-adblock-log-changed",
+        base::Value(static_cast<double>(service->total_blocked())));
   }
 }
 
@@ -95,9 +101,10 @@ void AdblockSettingsHandler::OnAdblockServiceShutdown() {
 
 void AdblockSettingsHandler::NotifyStateChangedSoon() {
   if (!state_timer_.IsRunning()) {
-    state_timer_.Start(FROM_HERE, kStateNotificationDelay,
-                       base::BindOnce(&AdblockSettingsHandler::NotifyStateChanged,
-                                      base::Unretained(this)));
+    state_timer_.Start(
+        FROM_HERE, kStateNotificationDelay,
+        base::BindOnce(&AdblockSettingsHandler::NotifyStateChanged,
+                       base::Unretained(this)));
   }
 }
 
@@ -144,6 +151,10 @@ void AdblockSettingsHandler::HandleSetBool(const base::ListValue& args) {
     service->SetContextMenuEnabled(value);
   } else if (name == "popupGuard") {
     service->SetPopupGuard(value);
+  } else if (name == "downloadGuard") {
+    service->SetDownloadGuard(value);
+  } else if (name == "antivirus") {
+    service->SetAntivirusCheck(value);
   }
 }
 
@@ -180,8 +191,8 @@ void AdblockSettingsHandler::HandleAddList(const base::ListValue& args) {
 }
 
 void AdblockSettingsHandler::HandleRemoveList(const base::ListValue& args) {
-  if (RebaAdblockService* service = Service(); service && args.size() >= 1 &&
-                                               args[0].is_string()) {
+  if (RebaAdblockService* service = Service();
+      service && args.size() >= 1 && args[0].is_string()) {
     service->RemoveCustomList(args[0].GetString());
   }
 }
@@ -222,8 +233,8 @@ void AdblockSettingsHandler::HandleAddTrustedSite(const base::ListValue& args) {
 
 void AdblockSettingsHandler::HandleRemoveTrustedSite(
     const base::ListValue& args) {
-  if (RebaAdblockService* service = Service(); service && args.size() >= 1 &&
-                                               args[0].is_string()) {
+  if (RebaAdblockService* service = Service();
+      service && args.size() >= 1 && args[0].is_string()) {
     service->RemoveTrustedSite(args[0].GetString());
   }
 }
@@ -232,10 +243,17 @@ void AdblockSettingsHandler::HandleGetLog(const base::ListValue& args) {
   AllowJavascript();
   CHECK_GE(args.size(), 1u);
   RebaAdblockService* service = Service();
-  ResolveJavascriptCallback(
-      args[0], service ? base::Value(BlockedRequestsToList(
-                             service->GetBlockedRequests()))
-                       : base::Value(base::ListValue()));
+  // The protection log and the blocked requests, in one list that the page
+  // sorts.
+  base::ListValue log;
+  if (service) {
+    log = SecurityEventsToList(service->GetSecurityEvents());
+    for (base::Value& request :
+         BlockedRequestsToList(service->GetBlockedRequests())) {
+      log.Append(std::move(request));
+    }
+  }
+  ResolveJavascriptCallback(args[0], std::move(log));
 }
 
 void AdblockSettingsHandler::HandleClearLog(const base::ListValue& args) {
@@ -254,6 +272,17 @@ void AdblockSettingsHandler::HandleLogAction(const base::ListValue& args) {
   const std::string& action = args[0].GetString();
   const GURL url(args[1].GetString());
   const std::string& page_host = args[2].GetString();
+  // These are about the site, whatever the address was.
+  if (action == "allowPopupsOnSite") {
+    service->AddExceptionSite(RebaAdblockService::Exception::kPopupGuard,
+                              page_host);
+    return;
+  }
+  if (action == "stopHoldingOnSite") {
+    service->AddExceptionSite(RebaAdblockService::Exception::kDownloadGuard,
+                              page_host);
+    return;
+  }
   if (!url.is_valid()) {
     return;
   }
@@ -265,6 +294,50 @@ void AdblockSettingsHandler::HandleLogAction(const base::ListValue& args) {
     service->AllowRequestForSession(url, std::string());
   } else if (action == "blockAlways") {
     service->BlockRequestAlways(url, std::string());
+  }
+}
+
+namespace {
+
+std::optional<RebaAdblockService::Exception> ExceptionFromName(
+    const std::string& name) {
+  if (name == "popup") {
+    return RebaAdblockService::Exception::kPopupGuard;
+  }
+  if (name == "download") {
+    return RebaAdblockService::Exception::kDownloadGuard;
+  }
+  return std::nullopt;
+}
+
+}  // namespace
+
+// args: callback id, "popup" or "download", site. Answers whether the site was
+// taken.
+void AdblockSettingsHandler::HandleAddExceptionSite(
+    const base::ListValue& args) {
+  AllowJavascript();
+  CHECK_GE(args.size(), 3u);
+  RebaAdblockService* service = Service();
+  std::optional<RebaAdblockService::Exception> which =
+      args[1].is_string() ? ExceptionFromName(args[1].GetString())
+                          : std::nullopt;
+  const bool ok = service && which && args[2].is_string() &&
+                  service->AddExceptionSite(*which, args[2].GetString());
+  ResolveJavascriptCallback(args[0], base::Value(ok));
+}
+
+// args: "popup" or "download", site.
+void AdblockSettingsHandler::HandleRemoveExceptionSite(
+    const base::ListValue& args) {
+  RebaAdblockService* service = Service();
+  if (!service || args.size() < 2 || !args[0].is_string() ||
+      !args[1].is_string()) {
+    return;
+  }
+  if (std::optional<RebaAdblockService::Exception> which =
+          ExceptionFromName(args[0].GetString())) {
+    service->RemoveExceptionSite(*which, args[1].GetString());
   }
 }
 

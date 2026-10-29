@@ -10,8 +10,8 @@ const TAB_NAMES = [
   'Settings',
   'Filter lists',
   'My filters',
-  'Trusted sites',
-  'Blocked requests',
+  'Sites',
+  'Protection log',
 ];
 
 // The index of "My filters" in TAB_NAMES.
