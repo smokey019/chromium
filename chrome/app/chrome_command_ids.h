@@ -285,6 +285,9 @@
 #define IDC_CHROME_ENTERPRISE_RELEASE_NOTES 40305
 #define IDC_SHOW_TTC_MENU 40306
 #define IDC_OPEN_OTHER_DEVICE_TAB 40307
+// REBA: "What's new in REBA". Kept clear of the upstream numbers above, which
+// keep growing.
+#define IDC_REBA_WHATS_NEW 40900
 
 // Spell-check
 #define IDC_SPELLCHECK_SUGGESTION_0     41000
