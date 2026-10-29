@@ -53,6 +53,7 @@ export interface SettingsRoutes {
   PEOPLE: Route;
   PERFORMANCE: Route;
   ADBLOCK: Route;
+  WHATS_NEW: Route;
   PRELOADING: Route;
   PRIVACY: Route;
   PRIVACY_GUIDE: Route;

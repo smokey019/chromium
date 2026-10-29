@@ -346,6 +346,9 @@ function createRoutes(): SettingsRoutes {
     r.ADBLOCK = r.BASIC.createSection('/adblock', 'adblock', 'Ad blocker');
   }
 
+  // REBA: the release notes.
+  r.WHATS_NEW = r.BASIC.createSection('/whatsNew', 'whatsNew', 'What\'s new');
+
   return r as unknown as SettingsRoutes;
 }
 
