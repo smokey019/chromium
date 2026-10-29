@@ -54,6 +54,9 @@ inline constexpr char kDownloadGuardAllowedSites[] =
 // bool. Hand programs, installers and archives that pages fetch to Windows'
 // antivirus before the page gets them.
 inline constexpr char kAntivirusCheck[] = "reba_adblock.antivirus_check";
+// bool. Take the lower qualities out of the video manifests pages fetch, so
+// streaming players play the best quality the site offers this browser.
+inline constexpr char kBestVideoQuality[] = "reba_adblock.best_video_quality";
 // bool. Download new versions of the filter lists on their own.
 inline constexpr char kAutoUpdate[] = "reba_adblock.auto_update";
 // dict: list id -> dict with "updated" (double, seconds since the epoch),

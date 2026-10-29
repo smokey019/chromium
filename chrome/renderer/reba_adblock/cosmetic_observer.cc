@@ -198,7 +198,8 @@ void CosmeticObserver::ApplyStyles(const mojom::CosmeticResources& resources) {
 
 bool CosmeticObserver::RunScriptsAtDocumentStart() {
   mojom::CosmeticResourcesPtr resources = std::move(pending_resources_);
-  if (!resources || (!resources->enabled && !resources->popup_guard)) {
+  if (!resources || (!resources->enabled && !resources->popup_guard &&
+                     !resources->best_video_quality)) {
     return true;
   }
   // The page's scripts can run too while ours do (microtasks, custom element
@@ -208,6 +209,10 @@ bool CosmeticObserver::RunScriptsAtDocumentStart() {
   // The pop-up guard goes in before anything else, so no script of the page
   // can get hold of the unguarded window.open().
   if (resources->popup_guard && !InstallPopupGuard()) {
+    return false;
+  }
+  // Before the page's scripts too, so it sees the manifests their players get.
+  if (resources->best_video_quality && !InstallVideoQuality()) {
     return false;
   }
   if (!resources->enabled) {
@@ -256,15 +261,16 @@ bool CosmeticObserver::InstallPopupGuard() {
     return true;
   }
   base::WeakPtr<CosmeticObserver> weak_this = weak_factory_.GetWeakPtr();
-  guard_event_ = base::StrCat(
-      {"r", base::UnguessableToken::Create().ToString()});
+  guard_event_ =
+      base::StrCat({"r", base::UnguessableToken::Create().ToString()});
 
   // The isolated world listens for the guard's reports and passes them on.
-  RunInIsolatedWorld(base::StrCat(
-      {"(function(){const n='", guard_event_,
-       "';window.addEventListener(n,function(){const r=document.documentElement;",
-       "const v=r&&r.getAttribute(n);if(r){r.removeAttribute(n);}",
-       "if(v){__rebaBridge('popup',v);}},true);})();"}));
+  RunInIsolatedWorld(
+      base::StrCat({"(function(){const n='", guard_event_,
+                    "';window.addEventListener(n,function(){const "
+                    "r=document.documentElement;",
+                    "const v=r&&r.getAttribute(n);if(r){r.removeAttribute(n);}",
+                    "if(v){__rebaBridge('popup',v);}},true);})();"}));
   if (!weak_this) {
     return false;
   }
@@ -276,6 +282,18 @@ bool CosmeticObserver::InstallPopupGuard() {
                                      guard_event_);
   render_frame()->GetWebFrame()->ExecuteScript(
       blink::WebScriptSource(blink::WebString::FromUtf8(script)));
+  return !!weak_this;
+}
+
+bool CosmeticObserver::InstallVideoQuality() {
+  if (!ClaimWindow(video_quality_context_)) {
+    return true;
+  }
+  base::WeakPtr<CosmeticObserver> weak_this = weak_factory_.GetWeakPtr();
+  render_frame()->GetWebFrame()->ExecuteScript(
+      blink::WebScriptSource(blink::WebString::FromUtf8(
+          ui::ResourceBundle::GetSharedInstance().LoadDataResourceString(
+              IDR_REBA_ADBLOCK_VIDEO_QUALITY_JS))));
   return !!weak_this;
 }
 

@@ -26,6 +26,10 @@ struct CosmeticResources {
   // control for them. Independent of `enabled`: it applies even when cosmetic
   // filtering is off.
   bool popup_guard;
+  // Take the lower qualities out of video manifests the page fetches, so
+  // players play the best one (see video_quality.js). Not ad blocking: it
+  // applies whatever the ad blocker's settings and trusted sites are.
+  bool best_video_quality;
 };
 
 // Used by the renderer of a frame to apply cosmetic filters. Implemented in
