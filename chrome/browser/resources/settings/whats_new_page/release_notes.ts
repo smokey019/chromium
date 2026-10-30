@@ -19,6 +19,14 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '159.0.8131.1',
+    date: '2026-10-29',
+    changes: [
+      '"What\'s new in REBA" in the REBA menu opens this page. In ' +
+          '159.0.8131.0 it was greyed out.',
+    ],
+  },
+  {
     version: '159.0.8131.0',
     date: '2026-10-29',
     changes: [

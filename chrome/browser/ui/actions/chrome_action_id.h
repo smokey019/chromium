@@ -162,6 +162,8 @@
   E(kActionEditSearchEngines, IDC_EDIT_SEARCH_ENGINES) \
   E(kActionViewPasswords, IDC_VIEW_PASSWORDS) \
   E(kActionAbout, IDC_ABOUT) \
+  /* REBA: the release notes */ \
+  E(kActionRebaWhatsNew, IDC_REBA_WHATS_NEW) \
   E(kActionHelpPageViaKeyboard, IDC_HELP_PAGE_VIA_KEYBOARD) \
   E(kActionHelpPageViaMenu, IDC_HELP_PAGE_VIA_MENU) \
   E(kActionShowAppMenu, IDC_SHOW_APP_MENU) \
