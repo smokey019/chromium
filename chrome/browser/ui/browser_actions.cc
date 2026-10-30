@@ -4515,6 +4515,23 @@ void BrowserActions::InitializeToolbarAndMiscActions() {
                   : vector_icons::kInfoRefreshOldIcon))
           .Build());
 
+  // REBA: the release notes (chrome://settings/whatsNew). Browser commands run
+  // as actions, so IDC_REBA_WHATS_NEW needs one or the menu item stays greyed.
+  root_action_item_->AddChild(
+      actions::ActionItem::Builder(
+          base::BindRepeating(
+              [](BrowserWindowInterface* bwi, actions::ActionItem* item,
+                 actions::ActionInvocationContext context) {
+                chrome::ShowSettingsSubPage(bwi, chrome::kRebaWhatsNewSubPage);
+              },
+              bwi))
+          .SetActionId(kActionRebaWhatsNew)
+          .SetText(u"What's new in REBA")
+          .SetImage(ui::ImageModel::FromVectorIcon(
+              features::IsRoundedIconsEnabled() ? kReleaseAlertIcon
+                                                : kReleaseAlertOldIcon))
+          .Build());
+
   root_action_item_->AddChild(
       ChromeMenuAction(
           base::BindRepeating(
