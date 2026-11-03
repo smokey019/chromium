@@ -11,6 +11,17 @@ namespace user_prefs {
 class PrefRegistrySyncable;
 }
 
+namespace prefs {
+
+// REBA: A boolean pref set to true if the "Install app" icon should show in the
+// address bar on sites that can be installed as an app. Off by default. Kept
+// here instead of chrome/common/pref_names.h, which over a thousand files
+// include.
+inline constexpr char kShowInstallAppButton[] =
+    "browser.show_install_app_button";
+
+}  // namespace prefs
+
 void RegisterBrowserPrefs(PrefRegistrySimple* registry);
 void RegisterBrowserUserPrefs(user_prefs::PrefRegistrySyncable* registry);
 
