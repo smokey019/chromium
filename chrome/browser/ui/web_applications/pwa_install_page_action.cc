@@ -11,6 +11,7 @@
 #include "chrome/browser/banners/app_banner_manager_desktop.h"
 #include "chrome/browser/profiles/profile.h"
 #include "chrome/browser/ui/actions/chrome_action_id.h"
+#include "chrome/browser/ui/browser_ui_prefs.h"
 #include "chrome/browser/ui/browser_window/public/browser_window_interface.h"
 #include "chrome/browser/ui/page_action/page_action_controller.h"
 #include "chrome/browser/ui/page_action/page_action_observer.h"
@@ -21,6 +22,7 @@
 #include "chrome/browser/web_applications/web_app_pref_guardrails.h"
 #include "chrome/grit/generated_resources.h"
 #include "components/feature_engagement/public/feature_constants.h"
+#include "components/prefs/pref_service.h"
 #include "components/site_engagement/content/site_engagement_service.h"
 #include "components/webapps/browser/banners/app_banner_manager.h"
 #include "content/public/browser/browser_thread.h"
@@ -57,6 +59,15 @@ PwaInstallPageActionController::PwaInstallPageActionController(
     if (manager_) {
       manager_->AddObserver(this);
     }
+    // REBA: the icon is hidden unless the user turns it on in Settings >
+    // Appearance; follow the setting in open tabs.
+    pref_change_registrar_.Init(
+        Profile::FromBrowserContext(web_contents->GetBrowserContext())
+            ->GetPrefs());
+    pref_change_registrar_.Add(
+        prefs::kShowInstallAppButton,
+        base::BindRepeating(&PwaInstallPageActionController::UpdateVisibility,
+                            base::Unretained(this)));
   }
 
   will_discard_contents_subscription_ =
@@ -162,6 +173,15 @@ void PwaInstallPageActionController::UpdateVisibility() {
   }
 
   if (!manager_) {
+    return;
+  }
+
+  // REBA: hidden unless turned on in Settings > Appearance. Installing stays
+  // available from the app menu.
+  if (!pref_change_registrar_.prefs() ||
+      !pref_change_registrar_.prefs()->GetBoolean(
+          prefs::kShowInstallAppButton)) {
+    Hide();
     return;
   }
 

@@ -11,6 +11,7 @@
 #include "chrome/browser/ui/page_action/page_action_controller.h"
 #include "chrome/browser/ui/page_action/page_action_observer.h"
 #include "chrome/browser/ui/web_applications/pwa_install_page_action.h"
+#include "components/prefs/pref_change_registrar.h"
 #include "components/user_education/common/feature_promo/feature_promo_result.h"
 #include "components/webapps/browser/banners/app_banner_manager.h"
 #include "content/public/browser/web_contents_observer.h"
@@ -131,6 +132,9 @@ class PwaInstallPageActionController
 
   base::CallbackListSubscription will_discard_contents_subscription_;
   base::CallbackListSubscription will_deactivate_subscription_;
+
+  // REBA: watches prefs::kShowInstallAppButton, which turns the icon on.
+  PrefChangeRegistrar pref_change_registrar_;
 
   base::WeakPtrFactory<PwaInstallPageActionController> weak_ptr_factory_{this};
 };

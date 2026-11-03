@@ -131,6 +131,9 @@ void RegisterBrowserUserPrefs(user_prefs::PrefRegistrySyncable* registry) {
 
   registry->RegisterBooleanPref(prefs::kShowForwardButton, true,
                                 pref_registration_flags);
+  // REBA: the address bar's "Install app" icon is hidden unless turned on in
+  // Settings > Appearance.
+  registry->RegisterBooleanPref(prefs::kShowInstallAppButton, false);
   registry->RegisterInt64Pref(prefs::kBookmarkBarHoverCount, 0);
   registry->RegisterInt64Pref(prefs::kBookmarkBarNavigationCount, 0);
   registry->RegisterTimePref(prefs::kBookmarkBarPreviousInitialRenderOnNtpTime,
