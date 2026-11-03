@@ -11,6 +11,7 @@
 #include "base/types/optional_ref.h"
 #include "chrome/browser/ui/page_action/page_action_controller.h"
 #include "chrome/browser/ui/page_action/page_action_observer.h"
+#include "components/prefs/pref_change_registrar.h"
 #include "components/user_education/common/feature_promo/feature_promo_result.h"
 #include "components/webapps/browser/banners/app_banner_manager.h"
 #include "content/public/browser/web_contents_observer.h"
@@ -136,6 +137,9 @@ class PwaInstallPageActionController
 
   ui::ScopedUnownedUserData<PwaInstallPageActionController>
       scoped_unowned_user_data_;
+
+  // REBA: watches prefs::kShowInstallAppButton, which turns the icon on.
+  PrefChangeRegistrar pref_change_registrar_;
 
   base::WeakPtrFactory<PwaInstallPageActionController> weak_ptr_factory_{this};
 };

@@ -31,6 +31,7 @@
 #include "chrome/browser/safe_browsing/generated_security_settings_bundle_pref.h"
 #include "chrome/browser/safe_browsing/settings/generated_safe_browsing_pref.h"
 #include "chrome/browser/ssl/generated_https_first_mode_pref.h"
+#include "chrome/browser/ui/browser_ui_prefs.h"
 #include "chrome/browser/ui/omnibox/omnibox_everywhere/omnibox_everywhere_prefs.h"
 #include "chrome/browser/ui/safety_hub/safety_hub_prefs.h"
 #include "chrome/browser/ui/tabs/tab_strip_prefs.h"
@@ -308,6 +309,8 @@ const PrefsUtil::TypedPrefMap& PrefsUtil::GetAllowlistedKeys() {
   (*s_allowlist)[contextual_search::kDriveConsentState] =
       settings_api::PrefType::kNumber;
   (*s_allowlist)[::prefs::kShowForwardButton] =
+      settings_api::PrefType::kBoolean;
+  (*s_allowlist)[::prefs::kShowInstallAppButton] =
       settings_api::PrefType::kBoolean;
   (*s_allowlist)[::prefs::kPinContextualTaskButton] =
       settings_api::PrefType::kBoolean;

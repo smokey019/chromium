@@ -117,6 +117,14 @@ export function getHtml(this: SettingsAppearancePageElement) {
         </settings-radio-group>
       </div>
     ` : ''}
+    <!-- REBA: English only, like the other REBA settings (no grit string,
+         which would rebuild everything that includes generated_resources.h).
+      -->
+    <settings-toggle-button id="showInstallAppButton" class="hr"
+        pref-key="browser.show_install_app_button"
+        label="Show install app button in the address bar"
+        sub-label="You can still install sites as apps from the menu">
+    </settings-toggle-button>
     <div id="ntpShortcutsCountRow" class="cr-row hr">
       <div class="flex cr-padded-text" aria-hidden="true">
         <div>$i18n{ntpShortcutsCount}</div>

@@ -19,6 +19,16 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '159.0.8131.2',
+    date: '2026-11-03',
+    changes: [
+      'The "Install app" button no longer appears in the address bar. To ' +
+          'get it back, turn on "Show install app button in the address ' +
+          'bar" in Settings > Appearance. You can still install a site as ' +
+          'an app from the REBA menu.',
+    ],
+  },
+  {
     version: '159.0.8131.1',
     date: '2026-10-29',
     changes: [

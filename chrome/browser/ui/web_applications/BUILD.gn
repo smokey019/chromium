@@ -155,6 +155,10 @@ source_set("impl") {
 
   if (toolkit_views) {
     sources += [ "pwa_install_page_action.cc" ]
+    deps += [
+      "//chrome/browser/ui:browser_ui_prefs",
+      "//components/prefs",
+    ]
   }
 
   if (enable_extensions) {
