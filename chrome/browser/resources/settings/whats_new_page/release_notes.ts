@@ -19,6 +19,14 @@ export interface ReleaseNote {
 
 export const RELEASE_NOTES: ReleaseNote[] = [
   {
+    version: '159.0.8154.6',
+    date: '2026-11-14',
+    changes: [
+      'Moved to Chromium 159 beta, which gets security fixes as they are ' +
+          'released.',
+    ],
+  },
+  {
     version: '159.0.8144.0',
     date: '2026-11-09',
     changes: [
